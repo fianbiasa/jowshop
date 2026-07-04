@@ -1,0 +1,250 @@
+[04-Jul-2026 19:08:13 Asia/Jakarta] PHP Warning:  require(/var/www/html/jowshop.web.id/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/html/jowshop.web.id/public/index.php on line 14
+[04-Jul-2026 19:08:13 Asia/Jakarta] PHP Warning:  require(/var/www/html/jowshop.web.id/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/html/jowshop.web.id/public/index.php on line 14
+[04-Jul-2026 19:08:13 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/html/jowshop.web.id/public/../vendor/autoload.php' (include_path='.:/usr/share/php') in /var/www/html/jowshop.web.id/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/public/index.php on line 14
+[04-Jul-2026 19:08:41 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/app.php:16
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/app.php on line 16
+[04-Jul-2026 19:09:19 Asia/Jakarta] PHP Warning:  require(/var/www/html/jowshop.web.id/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/html/jowshop.web.id/public/index.php on line 14
+[04-Jul-2026 19:09:19 Asia/Jakarta] PHP Warning:  require(/var/www/html/jowshop.web.id/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/html/jowshop.web.id/public/index.php on line 14
+[04-Jul-2026 19:09:19 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/html/jowshop.web.id/public/../vendor/autoload.php' (include_path='.:/usr/share/php') in /var/www/html/jowshop.web.id/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/public/index.php on line 14
+[04-Jul-2026 19:09:20 Asia/Jakarta] PHP Warning:  require(/var/www/html/jowshop.web.id/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/html/jowshop.web.id/public/index.php on line 14
+[04-Jul-2026 19:09:20 Asia/Jakarta] PHP Warning:  require(/var/www/html/jowshop.web.id/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/html/jowshop.web.id/public/index.php on line 14
+[04-Jul-2026 19:09:20 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/html/jowshop.web.id/public/../vendor/autoload.php' (include_path='.:/usr/share/php') in /var/www/html/jowshop.web.id/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/public/index.php on line 14
+[04-Jul-2026 19:09:36 Asia/Jakarta] PHP Warning:  require(/var/www/html/jowshop.web.id/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/html/jowshop.web.id/public/index.php on line 14
+[04-Jul-2026 19:09:36 Asia/Jakarta] PHP Warning:  require(/var/www/html/jowshop.web.id/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/html/jowshop.web.id/public/index.php on line 14
+[04-Jul-2026 19:09:36 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/html/jowshop.web.id/public/../vendor/autoload.php' (include_path='.:/usr/share/php') in /var/www/html/jowshop.web.id/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/public/index.php on line 14
+[04-Jul-2026 19:09:37 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Application" not found in /var/www/html/jowshop.web.id/bootstrap/app.php:11
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/bootstrap/app.php on line 11
+[04-Jul-2026 19:09:37 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Testing\TestCase" not found in /var/www/html/jowshop.web.id/tests/TestCase.php:8
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/tests/TestCase.php on line 8
+[04-Jul-2026 19:09:37 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "Illuminate\Support\Facades\Artisan" not found in /var/www/html/jowshop.web.id/routes/console.php:6
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/routes/console.php on line 6
+[04-Jul-2026 19:09:37 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "Illuminate\Support\Facades\Route" not found in /var/www/html/jowshop.web.id/routes/settings.php:12
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/routes/settings.php on line 12
+[04-Jul-2026 19:09:37 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "Illuminate\Support\Facades\Route" not found in /var/www/html/jowshop.web.id/routes/web.php:21
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/routes/web.php on line 21
+[04-Jul-2026 19:09:37 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/session.php:21
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/session.php on line 21
+[04-Jul-2026 19:09:37 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/auth.php:19
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/auth.php on line 19
+[04-Jul-2026 19:09:37 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/app.php:16
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/app.php on line 16
+[04-Jul-2026 19:09:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/services.php:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/services.php on line 18
+[04-Jul-2026 19:09:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function resource_path() in /var/www/html/jowshop.web.id/config/inertia.php:39
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/inertia.php on line 39
+[04-Jul-2026 19:09:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function config() in /var/www/html/jowshop.web.id/config/fortify.php:146
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/fortify.php on line 146
+[04-Jul-2026 19:09:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/logging.php:21
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/logging.php on line 21
+[04-Jul-2026 19:09:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/mail.php:17
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/mail.php on line 17
+[04-Jul-2026 19:09:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/filesystems.php:16
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/filesystems.php on line 16
+[04-Jul-2026 19:09:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/database.php:20
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/database.php on line 20
+[04-Jul-2026 19:09:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/cache.php:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/cache.php on line 18
+[04-Jul-2026 19:09:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/queue.php:16
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/queue.php on line 16
+[04-Jul-2026 19:09:40 Asia/Jakarta] PHP Warning:  require(/var/www/html/jowshop.web.id/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/html/jowshop.web.id/public/index.php on line 14
+[04-Jul-2026 19:09:40 Asia/Jakarta] PHP Warning:  require(/var/www/html/jowshop.web.id/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/html/jowshop.web.id/public/index.php on line 14
+[04-Jul-2026 19:09:40 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/html/jowshop.web.id/public/../vendor/autoload.php' (include_path='.:/usr/share/php') in /var/www/html/jowshop.web.id/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/public/index.php on line 14
+[04-Jul-2026 19:12:36 Asia/Jakarta] PHP Fatal error:  Uncaught RuntimeException: Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.4.1". You are running 8.3.31. in /var/www/html/jowshop.web.id/vendor/composer/platform_check.php:22
+Stack trace:
+#0 /var/www/html/jowshop.web.id/vendor/composer/autoload_real.php(25): require()
+#1 /var/www/html/jowshop.web.id/vendor/autoload.php(22): ComposerAutoloaderInit161609afe90a71eeee724e659c8ee9da::getLoader()
+#2 /var/www/html/jowshop.web.id/public/index.php(14): require('/var/www/html/j...')
+#3 {main}
+  thrown in /var/www/html/jowshop.web.id/vendor/composer/platform_check.php on line 22
+[04-Jul-2026 19:12:36 Asia/Jakarta] PHP Fatal error:  Uncaught RuntimeException: Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.4.1". You are running 8.3.31. in /var/www/html/jowshop.web.id/vendor/composer/platform_check.php:22
+Stack trace:
+#0 /var/www/html/jowshop.web.id/vendor/composer/autoload_real.php(25): require()
+#1 /var/www/html/jowshop.web.id/vendor/autoload.php(22): ComposerAutoloaderInit161609afe90a71eeee724e659c8ee9da::getLoader()
+#2 /var/www/html/jowshop.web.id/public/index.php(14): require('/var/www/html/j...')
+#3 {main}
+  thrown in /var/www/html/jowshop.web.id/vendor/composer/platform_check.php on line 22
+[04-Jul-2026 19:12:36 Asia/Jakarta] PHP Fatal error:  Uncaught RuntimeException: Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.4.1". You are running 8.3.31. in /var/www/html/jowshop.web.id/vendor/composer/platform_check.php:22
+Stack trace:
+#0 /var/www/html/jowshop.web.id/vendor/composer/autoload_real.php(25): require()
+#1 /var/www/html/jowshop.web.id/vendor/autoload.php(22): ComposerAutoloaderInit161609afe90a71eeee724e659c8ee9da::getLoader()
+#2 /var/www/html/jowshop.web.id/public/index.php(14): require('/var/www/html/j...')
+#3 {main}
+  thrown in /var/www/html/jowshop.web.id/vendor/composer/platform_check.php on line 22
+[04-Jul-2026 19:12:36 Asia/Jakarta] PHP Fatal error:  Uncaught RuntimeException: Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.4.1". You are running 8.3.31. in /var/www/html/jowshop.web.id/vendor/composer/platform_check.php:22
+Stack trace:
+#0 /var/www/html/jowshop.web.id/vendor/composer/autoload_real.php(25): require()
+#1 /var/www/html/jowshop.web.id/vendor/autoload.php(22): ComposerAutoloaderInit161609afe90a71eeee724e659c8ee9da::getLoader()
+#2 /var/www/html/jowshop.web.id/public/index.php(14): require('/var/www/html/j...')
+#3 {main}
+  thrown in /var/www/html/jowshop.web.id/vendor/composer/platform_check.php on line 22
+[04-Jul-2026 19:12:37 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Application" not found in /var/www/html/jowshop.web.id/bootstrap/app.php:11
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/bootstrap/app.php on line 11
+[04-Jul-2026 19:12:37 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Application" not found in /var/www/html/jowshop.web.id/bootstrap/app.php:11
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/bootstrap/app.php on line 11
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/app.php:16
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/app.php on line 16
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/auth.php:19
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/auth.php on line 19
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/cache.php:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/cache.php on line 18
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/database.php:20
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/database.php on line 20
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/filesystems.php:16
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/filesystems.php on line 16
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function config() in /var/www/html/jowshop.web.id/config/fortify.php:146
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/fortify.php on line 146
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function resource_path() in /var/www/html/jowshop.web.id/config/inertia.php:39
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/inertia.php on line 39
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/logging.php:21
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/logging.php on line 21
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/mail.php:17
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/mail.php on line 17
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/queue.php:16
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/queue.php on line 16
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/session.php:21
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/session.php on line 21
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/services.php:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/services.php on line 18
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "Illuminate\Support\Facades\Artisan" not found in /var/www/html/jowshop.web.id/routes/console.php:6
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/routes/console.php on line 6
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "Illuminate\Support\Facades\Route" not found in /var/www/html/jowshop.web.id/routes/settings.php:12
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/routes/settings.php on line 12
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "Illuminate\Support\Facades\Route" not found in /var/www/html/jowshop.web.id/routes/web.php:21
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/routes/web.php on line 21
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/app.php:16
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/app.php on line 16
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/auth.php:19
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/auth.php on line 19
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/cache.php:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/cache.php on line 18
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/database.php:20
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/database.php on line 20
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/filesystems.php:16
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/filesystems.php on line 16
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function config() in /var/www/html/jowshop.web.id/config/fortify.php:146
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/fortify.php on line 146
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function resource_path() in /var/www/html/jowshop.web.id/config/inertia.php:39
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/inertia.php on line 39
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/logging.php:21
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/logging.php on line 21
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/mail.php:17
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/mail.php on line 17
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/queue.php:16
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/queue.php on line 16
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/session.php:21
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/session.php on line 21
+[04-Jul-2026 19:12:38 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /var/www/html/jowshop.web.id/config/services.php:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/config/services.php on line 18
+[04-Jul-2026 19:12:39 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Testing\TestCase" not found in /var/www/html/jowshop.web.id/tests/TestCase.php:8
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/jowshop.web.id/tests/TestCase.php on line 8
