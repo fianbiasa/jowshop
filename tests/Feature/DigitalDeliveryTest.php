@@ -43,6 +43,13 @@ class DigitalDeliveryTest extends TestCase
         $settings = PaymentSetting::factory()->create();
 
         Http::fake([
+            '*/paymentmethod/getpaymentmethod' => Http::response([
+                'paymentFee' => [
+                    ['paymentMethod' => 'VC', 'paymentName' => 'CREDIT CARD', 'paymentImage' => 'https://images.duitku.com/hotlink-ok/VC.PNG', 'totalFee' => '0'],
+                ],
+                'responseCode' => '00',
+                'responseMessage' => 'SUCCESS',
+            ], 200),
             '*/inquiry' => Http::response([
                 'merchantCode' => 'DTEST',
                 'reference' => 'DTEST-REF-1',
@@ -59,7 +66,7 @@ class DigitalDeliveryTest extends TestCase
         ]);
 
         $order = Order::query()->firstOrFail();
-        $this->get("/f/{$funnel->slug}/checkout/bayar");
+        $this->post("/f/{$funnel->slug}/checkout/bayar", ['payment_method' => 'VC']);
 
         $amount = (int) round((float) $order->total);
         $signature = md5($settings->merchant_code.$amount.$order->order_number.$settings->api_key);

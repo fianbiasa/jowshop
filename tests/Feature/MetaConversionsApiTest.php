@@ -106,6 +106,13 @@ class MetaConversionsApiTest extends TestCase
     public function test_payment_success_sends_purchase_event_with_hashed_advanced_matching(): void
     {
         Http::fake([
+            '*/paymentmethod/getpaymentmethod' => Http::response([
+                'paymentFee' => [
+                    ['paymentMethod' => 'VC', 'paymentName' => 'CREDIT CARD', 'paymentImage' => 'https://images.duitku.com/hotlink-ok/VC.PNG', 'totalFee' => '0'],
+                ],
+                'responseCode' => '00',
+                'responseMessage' => 'SUCCESS',
+            ], 200),
             '*/inquiry' => Http::response([
                 'paymentUrl' => 'https://sandbox.duitku.com/pay/abc123',
                 'statusCode' => '00',
@@ -122,7 +129,7 @@ class MetaConversionsApiTest extends TestCase
             'phone' => '081234567890',
         ]);
         $order = Order::query()->firstOrFail();
-        $this->get("/f/{$funnel->slug}/checkout/bayar");
+        $this->post("/f/{$funnel->slug}/checkout/bayar", ['payment_method' => 'VC']);
 
         $amount = (int) round((float) $order->total);
         $signature = md5($settings->merchant_code.$amount.$order->order_number.$settings->api_key);

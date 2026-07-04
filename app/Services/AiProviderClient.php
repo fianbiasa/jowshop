@@ -68,10 +68,25 @@ class AiProviderClient
         }
 
         return [
-            'content' => (string) $response->json('content.0.text', ''),
+            'content' => $this->extractAnthropicText($response->json('content', [])),
             'tokens_input' => $response->json('usage.input_tokens'),
             'tokens_output' => $response->json('usage.output_tokens'),
         ];
+    }
+
+    /**
+     * Anthropic's content array can carry non-text blocks (e.g. "thinking")
+     * ahead of the actual reply, so the reply text must be found by type
+     * rather than assumed to be at a fixed index.
+     *
+     * @param  array<int, array<string, mixed>>  $blocks
+     */
+    private function extractAnthropicText(array $blocks): string
+    {
+        return collect($blocks)
+            ->where('type', 'text')
+            ->pluck('text')
+            ->implode('');
     }
 
     /**

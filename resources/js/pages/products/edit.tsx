@@ -3,6 +3,7 @@ import { useState } from 'react';
 import ProductController from '@/actions/App/Http/Controllers/ProductController';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { index } from '@/routes/products';
 import type { Product } from '@/types/models';
 import ProductDigitalAssets from './product-digital-assets';
@@ -15,36 +16,40 @@ export default function Edit({ product }: { product: Product }) {
         <>
             <Head title={`Edit ${product.name}`} />
 
-            <div className="mx-auto max-w-2xl space-y-6 p-4">
+            <div className="space-y-6 p-4">
                 <Heading
                     title="Edit Produk"
                     description="Perbarui detail produk"
                 />
 
-                <Form
-                    {...ProductController.update.form(product.id)}
-                    className="space-y-6"
-                >
-                    {({ processing, errors }) => (
-                        <>
-                            <ProductFormFields
-                                product={product}
-                                errors={errors}
-                                type={type}
-                                onTypeChange={setType}
-                            />
+                <Card>
+                    <CardContent className="lg:px-10 lg:py-4">
+                        <Form
+                            {...ProductController.update.form(product.id)}
+                            className="space-y-6"
+                        >
+                            {({ processing, errors }) => (
+                                <>
+                                    <ProductFormFields
+                                        product={product}
+                                        errors={errors}
+                                        type={type}
+                                        onTypeChange={setType}
+                                    />
 
-                            <div className="flex items-center gap-4">
-                                <Button disabled={processing}>
-                                    Simpan Perubahan
-                                </Button>
-                                <Button variant="secondary" asChild>
-                                    <Link href={index()}>Batal</Link>
-                                </Button>
-                            </div>
-                        </>
-                    )}
-                </Form>
+                                    <div className="flex items-center gap-4">
+                                        <Button disabled={processing}>
+                                            Simpan Perubahan
+                                        </Button>
+                                        <Button variant="secondary" asChild>
+                                            <Link href={index()}>Batal</Link>
+                                        </Button>
+                                    </div>
+                                </>
+                            )}
+                        </Form>
+                    </CardContent>
+                </Card>
 
                 {type === 'digital' && (
                     <ProductDigitalAssets product={product} />

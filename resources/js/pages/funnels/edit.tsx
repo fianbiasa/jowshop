@@ -34,7 +34,7 @@ export default function Edit({
         <>
             <Head title={`Kelola ${funnel.name}`} />
 
-            <div className="mx-auto max-w-3xl space-y-8 p-4">
+            <div className="space-y-8 p-4">
                 <div className="flex items-center justify-between">
                     <Heading
                         title={funnel.name}
@@ -70,82 +70,94 @@ export default function Edit({
                     >
                         {({ processing, errors }) => (
                             <>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="name">Nama Funnel</Label>
-                                    <Input
-                                        id="name"
-                                        name="name"
-                                        required
-                                        defaultValue={funnel.name}
-                                    />
-                                    <InputError message={errors.name} />
+                                <div className="grid gap-6 md:grid-cols-2">
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="name">
+                                            Nama Funnel
+                                        </Label>
+                                        <Input
+                                            id="name"
+                                            name="name"
+                                            required
+                                            defaultValue={funnel.name}
+                                        />
+                                        <InputError message={errors.name} />
+                                    </div>
+
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="slug">Slug</Label>
+                                        <Input
+                                            id="slug"
+                                            name="slug"
+                                            required
+                                            defaultValue={funnel.slug}
+                                        />
+                                        <InputError message={errors.slug} />
+                                    </div>
                                 </div>
 
-                                <div className="grid gap-2">
-                                    <Label htmlFor="slug">Slug</Label>
-                                    <Input
-                                        id="slug"
-                                        name="slug"
-                                        required
-                                        defaultValue={funnel.slug}
-                                    />
-                                    <InputError message={errors.slug} />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="product_id">
-                                        Produk Utama
-                                    </Label>
-                                    <Select
-                                        name="product_id"
-                                        defaultValue={String(funnel.product_id)}
-                                    >
-                                        <SelectTrigger
-                                            id="product_id"
-                                            className="w-full"
+                                <div className="grid gap-6 md:grid-cols-2">
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="product_id">
+                                            Produk Utama
+                                        </Label>
+                                        <Select
+                                            name="product_id"
+                                            defaultValue={String(
+                                                funnel.product_id,
+                                            )}
                                         >
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {products.map((product) => (
-                                                <SelectItem
-                                                    key={product.id}
-                                                    value={String(product.id)}
-                                                >
-                                                    {product.name} (
-                                                    {product.type})
+                                            <SelectTrigger
+                                                id="product_id"
+                                                className="w-full"
+                                            >
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {products.map((product) => (
+                                                    <SelectItem
+                                                        key={product.id}
+                                                        value={String(
+                                                            product.id,
+                                                        )}
+                                                    >
+                                                        {product.name} (
+                                                        {product.type})
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <InputError
+                                            message={errors.product_id}
+                                        />
+                                    </div>
+
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="status">Status</Label>
+                                        <Select
+                                            name="status"
+                                            defaultValue={funnel.status}
+                                        >
+                                            <SelectTrigger
+                                                id="status"
+                                                className="w-full"
+                                            >
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="draft">
+                                                    Draft
                                                 </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <InputError message={errors.product_id} />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="status">Status</Label>
-                                    <Select
-                                        name="status"
-                                        defaultValue={funnel.status}
-                                    >
-                                        <SelectTrigger
-                                            id="status"
-                                            className="w-full"
-                                        >
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="draft">
-                                                Draft
-                                            </SelectItem>
-                                            <SelectItem value="published">
-                                                Published
-                                            </SelectItem>
-                                            <SelectItem value="archived">
-                                                Archived
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <InputError message={errors.status} />
+                                                <SelectItem value="published">
+                                                    Published
+                                                </SelectItem>
+                                                <SelectItem value="archived">
+                                                    Archived
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <InputError message={errors.status} />
+                                    </div>
                                 </div>
 
                                 <div className="grid gap-2">

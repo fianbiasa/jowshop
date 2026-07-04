@@ -5,13 +5,13 @@ namespace App\Http\Controllers;
 use App\Concerns\ManagesCheckoutSession;
 use App\Concerns\SharesMetaPixelProp;
 use App\Enums\FunnelEventType;
-use App\Exceptions\PaymentGatewayException;
 use App\Enums\FunnelStatus;
 use App\Enums\OfferStage;
 use App\Enums\OfferTriggerCondition;
 use App\Enums\OrderItemType;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
+use App\Exceptions\PaymentGatewayException;
 use App\Http\Requests\StoreCheckoutRequest;
 use App\Models\Customer;
 use App\Models\Funnel;
@@ -26,6 +26,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class CheckoutController extends Controller
@@ -140,20 +141,46 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Create the Duitku transaction for the in-progress order and redirect
-     * the browser to Duitku's hosted payment page.
+     * Show the available Duitku payment methods for the in-progress order.
      */
-    public function pay(Request $request, Funnel $funnel, FunnelTracker $tracker, DuitkuGateway $gateway): RedirectResponse
+    public function pay(Request $request, Funnel $funnel, DuitkuGateway $gateway): Response
     {
         $this->ensurePublished($funnel);
 
-        $orderId = $request->session()->get($this->orderSessionKey($funnel));
+        $order = $this->orderFromSession($request, $funnel);
 
-        if (! is_int($orderId)) {
-            throw new NotFoundHttpException;
+        $settings = PaymentSetting::query()->where('is_active', true)->first();
+
+        abort_if($settings === null, 503, 'Pembayaran belum dikonfigurasi.');
+
+        try {
+            $methods = $gateway->getPaymentMethods($settings, $gateway->amountAsInt($order->total));
+        } catch (PaymentGatewayException $exception) {
+            report($exception);
+
+            abort(503, 'Metode pembayaran sedang tidak tersedia, silakan coba lagi beberapa saat lagi.');
         }
 
-        $order = Order::query()->findOrFail($orderId);
+        return Inertia::render('public/checkout-payment', [
+            'funnel' => ['name' => $funnel->name, 'slug' => $funnel->slug],
+            'methods' => $methods,
+        ]);
+    }
+
+    /**
+     * Create the Duitku transaction for the in-progress order using the
+     * chosen payment method, then redirect the browser to Duitku's hosted
+     * payment page.
+     */
+    public function payStore(Request $request, Funnel $funnel, FunnelTracker $tracker, DuitkuGateway $gateway): SymfonyResponse
+    {
+        $this->ensurePublished($funnel);
+
+        $validated = $request->validate([
+            'payment_method' => ['required', 'string'],
+        ]);
+
+        $order = $this->orderFromSession($request, $funnel);
 
         $settings = PaymentSetting::query()->where('is_active', true)->first();
 
@@ -167,6 +194,7 @@ class CheckoutController extends Controller
             [
                 'merchant_order_id' => $order->order_number,
                 'amount' => $order->total,
+                'payment_method' => $validated['payment_method'],
                 'status' => PaymentStatus::Pending,
             ],
         );
@@ -181,6 +209,7 @@ class CheckoutController extends Controller
                 $order,
                 $gateway->amountAsInt($order->total),
                 $order->order_number,
+                $validated['payment_method'],
                 route('webhooks.duitku'),
                 route('public.checkout.return', $funnel),
             );
@@ -190,7 +219,7 @@ class CheckoutController extends Controller
             abort(503, 'Pembayaran sedang tidak tersedia, silakan coba lagi beberapa saat lagi.');
         }
 
-        return redirect()->away((string) $transaction['paymentUrl']);
+        return Inertia::location((string) $transaction['paymentUrl']);
     }
 
     /**
@@ -259,6 +288,17 @@ class CheckoutController extends Controller
         if ($funnel->status !== FunnelStatus::Published) {
             throw new NotFoundHttpException;
         }
+    }
+
+    private function orderFromSession(Request $request, Funnel $funnel): Order
+    {
+        $orderId = $request->session()->get($this->orderSessionKey($funnel));
+
+        if (! is_int($orderId)) {
+            throw new NotFoundHttpException;
+        }
+
+        return Order::query()->findOrFail($orderId);
     }
 
     /**

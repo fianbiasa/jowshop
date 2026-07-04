@@ -36,6 +36,19 @@ class PostPurchaseOfferTest extends TestCase
         return $funnel;
     }
 
+    private function fakeDuitkuPaymentMethods(): void
+    {
+        Http::fake([
+            '*/paymentmethod/getpaymentmethod' => Http::response([
+                'paymentFee' => [
+                    ['paymentMethod' => 'VC', 'paymentName' => 'CREDIT CARD', 'paymentImage' => 'https://images.duitku.com/hotlink-ok/VC.PNG', 'totalFee' => '0'],
+                ],
+                'responseCode' => '00',
+                'responseMessage' => 'SUCCESS',
+            ], 200),
+        ]);
+    }
+
     private function fakeDuitkuInquiry(): void
     {
         Http::fake([
@@ -48,6 +61,11 @@ class PostPurchaseOfferTest extends TestCase
         ]);
     }
 
+    /**
+     * Assumes the caller has already faked both the payment-method list and
+     * the inquiry endpoints (via fakeDuitkuPaymentMethods()/fakeDuitkuInquiry()
+     * or an equivalent custom fake).
+     */
     private function payAndConfirmMainOrder(Funnel $funnel): Order
     {
         $this->post("/f/{$funnel->slug}/checkout", [
@@ -58,7 +76,7 @@ class PostPurchaseOfferTest extends TestCase
 
         $order = Order::query()->firstOrFail();
 
-        $this->get("/f/{$funnel->slug}/checkout/bayar");
+        $this->post("/f/{$funnel->slug}/checkout/bayar", ['payment_method' => 'VC']);
 
         $settings = PaymentSetting::query()->firstOrFail();
         $amount = (int) round((float) $order->total);
@@ -78,6 +96,7 @@ class PostPurchaseOfferTest extends TestCase
     public function test_return_page_without_upsell_offers_finalizes_immediately(): void
     {
         PaymentSetting::factory()->create();
+        $this->fakeDuitkuPaymentMethods();
         $this->fakeDuitkuInquiry();
 
         $funnel = $this->publishedFunnel();
@@ -97,6 +116,7 @@ class PostPurchaseOfferTest extends TestCase
     public function test_return_page_redirects_to_root_upsell_when_order_is_paid(): void
     {
         PaymentSetting::factory()->create();
+        $this->fakeDuitkuPaymentMethods();
         $this->fakeDuitkuInquiry();
 
         $funnel = $this->publishedFunnel();
@@ -128,6 +148,7 @@ class PostPurchaseOfferTest extends TestCase
     public function test_declining_upsell_moves_to_downsell_without_payment(): void
     {
         PaymentSetting::factory()->create();
+        $this->fakeDuitkuPaymentMethods();
         $this->fakeDuitkuInquiry();
 
         $funnel = $this->publishedFunnel();
@@ -160,6 +181,7 @@ class PostPurchaseOfferTest extends TestCase
     public function test_declining_entire_upsell_chain_finalizes_without_payment(): void
     {
         PaymentSetting::factory()->create();
+        $this->fakeDuitkuPaymentMethods();
         $this->fakeDuitkuInquiry();
 
         $funnel = $this->publishedFunnel();
@@ -185,6 +207,7 @@ class PostPurchaseOfferTest extends TestCase
     public function test_accepting_upsell_creates_incremental_payment_and_redirects_to_duitku(): void
     {
         $settings = PaymentSetting::factory()->create();
+        $this->fakeDuitkuPaymentMethods();
         $this->fakeDuitkuInquiry();
 
         $funnel = $this->publishedFunnel();
@@ -209,6 +232,36 @@ class PostPurchaseOfferTest extends TestCase
         $this->assertSame(50000.0, (float) $payment->amount);
     }
 
+    public function test_accepting_upsell_reuses_the_main_orders_payment_method(): void
+    {
+        PaymentSetting::factory()->create();
+        $this->fakeDuitkuPaymentMethods();
+        $this->fakeDuitkuInquiry();
+
+        $funnel = $this->publishedFunnel();
+        $upsell = FunnelOffer::factory()->for($funnel)->upsell()->create([
+            'price_override' => 50000,
+            'sequence' => 1,
+        ]);
+
+        $order = $this->payAndConfirmMainOrder($funnel);
+        $this->get("/f/{$funnel->slug}/checkout/kembali");
+
+        $this->post("/f/{$funnel->slug}/upsell/{$upsell->id}", [
+            'response' => 'accepted',
+        ]);
+
+        $mainPaymentMethod = $order->payments()->oldest()->first()->payment_method;
+        $this->assertSame('VC', $mainPaymentMethod);
+
+        $upsellPayment = Payment::query()->where('merchant_order_id', "{$order->order_number}-O{$upsell->id}")->firstOrFail();
+        $this->assertSame($mainPaymentMethod, $upsellPayment->payment_method);
+
+        Http::assertSent(fn ($request) => str_contains($request->url(), '/inquiry')
+            && ($request->data()['merchantOrderId'] ?? null) === "{$order->order_number}-O{$upsell->id}"
+            && $request->data()['paymentMethod'] === $mainPaymentMethod);
+    }
+
     public function test_accepting_upsell_shows_friendly_error_when_duitku_request_fails(): void
     {
         PaymentSetting::factory()->create();
@@ -223,6 +276,16 @@ class PostPurchaseOfferTest extends TestCase
         // incremental payment (merchantOrderId contains "-O{offerId}")
         // fails, so this exercises the failure path in isolation.
         Http::fake(function ($request) {
+            if (str_contains($request->url(), '/paymentmethod/getpaymentmethod')) {
+                return Http::response([
+                    'paymentFee' => [
+                        ['paymentMethod' => 'VC', 'paymentName' => 'CREDIT CARD', 'paymentImage' => 'https://images.duitku.com/hotlink-ok/VC.PNG', 'totalFee' => '0'],
+                    ],
+                    'responseCode' => '00',
+                    'responseMessage' => 'SUCCESS',
+                ], 200);
+            }
+
             $merchantOrderId = (string) ($request->data()['merchantOrderId'] ?? '');
 
             if (str_contains($merchantOrderId, '-O')) {
@@ -251,6 +314,7 @@ class PostPurchaseOfferTest extends TestCase
     public function test_full_chain_upsell_declined_then_downsell_accepted_and_paid(): void
     {
         $settings = PaymentSetting::factory()->create();
+        $this->fakeDuitkuPaymentMethods();
         $this->fakeDuitkuInquiry();
 
         $funnel = $this->publishedFunnel();
@@ -312,6 +376,7 @@ class PostPurchaseOfferTest extends TestCase
     public function test_incremental_payment_webhook_does_not_double_decrement_stock(): void
     {
         $settings = PaymentSetting::factory()->create();
+        $this->fakeDuitkuPaymentMethods();
         $this->fakeDuitkuInquiry();
 
         $product = Product::factory()->physical()->published()->create(['price' => 45000, 'stock' => 10]);
@@ -339,7 +404,7 @@ class PostPurchaseOfferTest extends TestCase
         ]);
         $order = Order::query()->firstOrFail();
 
-        $this->get("/f/{$funnel->slug}/checkout/bayar");
+        $this->post("/f/{$funnel->slug}/checkout/bayar", ['payment_method' => 'VC']);
         $amount = (int) round((float) $order->total);
         $this->post('/webhooks/duitku', [
             'merchantCode' => $settings->merchant_code,

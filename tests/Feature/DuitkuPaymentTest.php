@@ -14,7 +14,9 @@ use App\Models\PaymentSetting;
 use App\Models\Product;
 use App\Models\Salespage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\Request as ClientRequest;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 class DuitkuPaymentTest extends TestCase
@@ -46,6 +48,20 @@ class DuitkuPaymentTest extends TestCase
         return Order::query()->firstOrFail();
     }
 
+    private function fakeDuitkuPaymentMethods(): void
+    {
+        Http::fake([
+            '*/paymentmethod/getpaymentmethod' => Http::response([
+                'paymentFee' => [
+                    ['paymentMethod' => 'VC', 'paymentName' => 'CREDIT CARD', 'paymentImage' => 'https://images.duitku.com/hotlink-ok/VC.PNG', 'totalFee' => '0'],
+                    ['paymentMethod' => 'BC', 'paymentName' => 'BCA VA', 'paymentImage' => 'https://images.duitku.com/hotlink-ok/BCA.SVG', 'totalFee' => '0'],
+                ],
+                'responseCode' => '00',
+                'responseMessage' => 'SUCCESS',
+            ], 200),
+        ]);
+    }
+
     private function fakeDuitkuInquiry(): void
     {
         Http::fake([
@@ -56,6 +72,22 @@ class DuitkuPaymentTest extends TestCase
                 'statusCode' => '00',
                 'statusMessage' => 'SUCCESS',
             ], 200),
+        ]);
+    }
+
+    /**
+     * Fakes both the payment-method list and inquiry endpoints, then posts
+     * the customer's chosen method to the pay step. Replaces what used to
+     * be a single GET to /checkout/bayar before payment-method selection
+     * existed.
+     */
+    private function payWithMethod(Funnel $funnel, string $method = 'VC'): TestResponse
+    {
+        $this->fakeDuitkuPaymentMethods();
+        $this->fakeDuitkuInquiry();
+
+        return $this->post("/f/{$funnel->slug}/checkout/bayar", [
+            'payment_method' => $method,
         ]);
     }
 
@@ -74,32 +106,54 @@ class DuitkuPaymentTest extends TestCase
         $response->assertStatus(503);
     }
 
+    public function test_pay_shows_available_payment_methods(): void
+    {
+        PaymentSetting::factory()->create();
+        $this->fakeDuitkuPaymentMethods();
+
+        $funnel = $this->publishedFunnel();
+        $this->checkoutOrder($funnel);
+
+        $response = $this->get("/f/{$funnel->slug}/checkout/bayar");
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('public/checkout-payment')
+            ->has('methods', 2)
+            ->where('methods.0.code', 'VC')
+        );
+    }
+
     public function test_pay_creates_payment_and_redirects_to_duitku(): void
     {
         PaymentSetting::factory()->create();
-        $this->fakeDuitkuInquiry();
 
         $funnel = $this->publishedFunnel();
         $order = $this->checkoutOrder($funnel);
 
-        $response = $this->get("/f/{$funnel->slug}/checkout/bayar");
+        $response = $this->payWithMethod($funnel, 'VC');
 
         $response->assertRedirect('https://sandbox.duitku.com/pay/abc123');
 
         $payment = Payment::query()->where('order_id', $order->id)->firstOrFail();
         $this->assertSame(PaymentStatus::Pending, $payment->status);
         $this->assertSame($order->order_number, $payment->merchant_order_id);
+        $this->assertSame('VC', $payment->payment_method);
+
+        Http::assertSent(fn (ClientRequest $request) => str_contains($request->url(), '/inquiry')
+            && $request->data()['paymentMethod'] === 'VC');
     }
 
     public function test_pay_shows_friendly_error_when_duitku_request_fails(): void
     {
         PaymentSetting::factory()->create();
+        $this->fakeDuitkuPaymentMethods();
         Http::fake(['*/inquiry' => Http::response(['Message' => 'Not Found'], 404)]);
 
         $funnel = $this->publishedFunnel();
         $this->checkoutOrder($funnel);
 
-        $response = $this->get("/f/{$funnel->slug}/checkout/bayar");
+        $response = $this->post("/f/{$funnel->slug}/checkout/bayar", ['payment_method' => 'VC']);
 
         $response->assertStatus(503);
     }
@@ -107,12 +161,13 @@ class DuitkuPaymentTest extends TestCase
     public function test_pay_shows_friendly_error_when_duitku_is_unreachable(): void
     {
         PaymentSetting::factory()->create();
+        $this->fakeDuitkuPaymentMethods();
         Http::fake(['*/inquiry' => Http::failedConnection()]);
 
         $funnel = $this->publishedFunnel();
         $this->checkoutOrder($funnel);
 
-        $response = $this->get("/f/{$funnel->slug}/checkout/bayar");
+        $response = $this->post("/f/{$funnel->slug}/checkout/bayar", ['payment_method' => 'VC']);
 
         $response->assertStatus(503);
     }
@@ -120,11 +175,10 @@ class DuitkuPaymentTest extends TestCase
     public function test_return_page_shows_current_order_status(): void
     {
         PaymentSetting::factory()->create();
-        $this->fakeDuitkuInquiry();
 
         $funnel = $this->publishedFunnel();
         $this->checkoutOrder($funnel);
-        $this->get("/f/{$funnel->slug}/checkout/bayar");
+        $this->payWithMethod($funnel);
 
         $response = $this->get("/f/{$funnel->slug}/checkout/kembali");
 
@@ -138,11 +192,10 @@ class DuitkuPaymentTest extends TestCase
     public function test_webhook_with_valid_signature_marks_payment_and_order_paid(): void
     {
         $settings = PaymentSetting::factory()->create();
-        $this->fakeDuitkuInquiry();
 
         $funnel = $this->publishedFunnel();
         $order = $this->checkoutOrder($funnel);
-        $this->get("/f/{$funnel->slug}/checkout/bayar");
+        $this->payWithMethod($funnel);
 
         $amount = (int) round((float) $order->total);
 
@@ -168,11 +221,10 @@ class DuitkuPaymentTest extends TestCase
     public function test_webhook_with_invalid_signature_is_rejected(): void
     {
         $settings = PaymentSetting::factory()->create();
-        $this->fakeDuitkuInquiry();
 
         $funnel = $this->publishedFunnel();
         $order = $this->checkoutOrder($funnel);
-        $this->get("/f/{$funnel->slug}/checkout/bayar");
+        $this->payWithMethod($funnel);
 
         $response = $this->post('/webhooks/duitku', [
             'merchantCode' => $settings->merchant_code,
@@ -192,14 +244,13 @@ class DuitkuPaymentTest extends TestCase
     public function test_webhook_is_idempotent_for_duplicate_callbacks(): void
     {
         $settings = PaymentSetting::factory()->create();
-        $this->fakeDuitkuInquiry();
 
         $funnel = $this->publishedFunnel('physical');
         $product = $funnel->product;
         $product->update(['stock' => 10]);
 
         $order = $this->checkoutOrderPhysical($funnel);
-        $this->get("/f/{$funnel->slug}/checkout/bayar");
+        $this->payWithMethod($funnel);
 
         $amount = (int) round((float) $order->total);
         $payload = [
@@ -226,14 +277,13 @@ class DuitkuPaymentTest extends TestCase
     public function test_webhook_success_decrements_physical_product_stock(): void
     {
         $settings = PaymentSetting::factory()->create();
-        $this->fakeDuitkuInquiry();
 
         $funnel = $this->publishedFunnel('physical');
         $product = $funnel->product;
         $product->update(['stock' => 5]);
 
         $order = $this->checkoutOrderPhysical($funnel);
-        $this->get("/f/{$funnel->slug}/checkout/bayar");
+        $this->payWithMethod($funnel);
 
         $amount = (int) round((float) $order->total);
 
@@ -251,11 +301,10 @@ class DuitkuPaymentTest extends TestCase
     public function test_webhook_success_marks_funnel_session_converted(): void
     {
         $settings = PaymentSetting::factory()->create();
-        $this->fakeDuitkuInquiry();
 
         $funnel = $this->publishedFunnel();
         $order = $this->checkoutOrder($funnel);
-        $this->get("/f/{$funnel->slug}/checkout/bayar");
+        $this->payWithMethod($funnel);
 
         $amount = (int) round((float) $order->total);
 
@@ -275,11 +324,10 @@ class DuitkuPaymentTest extends TestCase
     public function test_webhook_failure_records_payment_failed_and_does_not_mark_order_paid(): void
     {
         $settings = PaymentSetting::factory()->create();
-        $this->fakeDuitkuInquiry();
 
         $funnel = $this->publishedFunnel();
         $order = $this->checkoutOrder($funnel);
-        $this->get("/f/{$funnel->slug}/checkout/bayar");
+        $this->payWithMethod($funnel);
 
         $amount = (int) round((float) $order->total);
 

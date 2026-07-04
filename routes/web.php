@@ -26,6 +26,7 @@ Route::prefix('f/{funnel:slug}')->name('public.')->middleware('throttle:public-f
     Route::get('checkout', [CheckoutController::class, 'show'])->name('checkout.show');
     Route::post('checkout', [CheckoutController::class, 'store'])->name('checkout.store');
     Route::get('checkout/bayar', [CheckoutController::class, 'pay'])->name('checkout.pay');
+    Route::post('checkout/bayar', [CheckoutController::class, 'payStore'])->name('checkout.pay.store');
     Route::get('checkout/kembali', [CheckoutController::class, 'return'])->name('checkout.return');
 
     Route::get('checkout/offers/{offer}', [CheckoutOfferController::class, 'show'])->name('checkout.offer.show');

@@ -52,7 +52,7 @@ class DuitkuWebhookController extends Controller
         $payment->update([
             'status' => $isPaid ? PaymentStatus::Paid : PaymentStatus::Failed,
             'gateway_reference' => $payload['reference'] ?? null,
-            'payment_method' => $payload['paymentCode'] ?? null,
+            'payment_method' => $payload['paymentCode'] ?? $payment->payment_method,
             'paid_at' => $isPaid ? now() : null,
             'raw_callback' => $payload,
         ]);

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Funnels;
 
+use App\Enums\AiProvider;
 use App\Models\AiProviderSetting;
 use App\Models\Funnel;
 use App\Models\Salespage;
@@ -181,6 +182,46 @@ class SalespageManagementTest extends TestCase
             'ai_provider_setting_id' => $setting->id,
             'status' => 'failed',
             'response_excerpt' => 'Halo! Ini bukan JSON.',
+        ]);
+    }
+
+    public function test_anthropic_generation_skips_thinking_blocks_to_find_the_reply_text(): void
+    {
+        Http::fake([
+            'api.anthropic.com/*' => Http::response([
+                'content' => [
+                    ['type' => 'thinking', 'thinking' => 'Menyusun salespage...'],
+                    ['type' => 'text', 'text' => json_encode([
+                        ['type' => 'headline', 'data' => ['text' => 'Kopi Terbaik di Kota']],
+                        ['type' => 'cta', 'data' => ['label' => 'Beli Sekarang']],
+                    ])],
+                ],
+                'usage' => ['input_tokens' => 120, 'output_tokens' => 40],
+            ], 200),
+        ]);
+
+        $user = User::factory()->create();
+        $funnel = Funnel::factory()->for($user, 'creator')->create();
+        $setting = AiProviderSetting::factory()->for($user, 'creator')->create([
+            'provider' => AiProvider::Anthropic,
+            'default_model' => 'claude-sonnet-5',
+        ]);
+
+        $response = $this->actingAs($user)->post(route('funnels.salespage.generate', $funnel), [
+            'ai_provider_setting_id' => $setting->id,
+        ]);
+
+        $response->assertSessionHasNoErrors();
+
+        $salespage = Salespage::query()->where('funnel_id', $funnel->id)->firstOrFail();
+        $this->assertSame('headline', $salespage->content[0]['type']);
+        $this->assertSame('Kopi Terbaik di Kota', $salespage->content[0]['data']['text']);
+
+        $this->assertDatabaseHas('ai_generation_logs', [
+            'ai_provider_setting_id' => $setting->id,
+            'status' => 'success',
+            'tokens_input' => 120,
+            'tokens_output' => 40,
         ]);
     }
 

@@ -17,11 +17,11 @@ use App\Models\Payment;
 use App\Models\PaymentSetting;
 use App\Services\DuitkuGateway;
 use App\Services\FunnelTracker;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class CheckoutUpsellController extends Controller
@@ -74,7 +74,7 @@ class CheckoutUpsellController extends Controller
         FunnelOffer $offer,
         FunnelTracker $tracker,
         DuitkuGateway $gateway,
-    ): RedirectResponse {
+    ): SymfonyResponse {
         $this->ensureOfferBelongsToFunnel($funnel, $offer);
 
         $validated = $request->validate([
@@ -127,6 +127,10 @@ class CheckoutUpsellController extends Controller
 
         abort_if($settings === null, 503, 'Pembayaran belum dikonfigurasi.');
 
+        $paymentMethod = $order->payments()->oldest()->first()?->payment_method;
+
+        abort_if($paymentMethod === null, 503, 'Pembayaran sedang tidak tersedia, silakan coba lagi beberapa saat lagi.');
+
         $merchantOrderId = "{$order->order_number}-O{$offer->id}";
 
         Payment::query()->firstOrCreate(
@@ -134,6 +138,7 @@ class CheckoutUpsellController extends Controller
             [
                 'order_id' => $order->id,
                 'amount' => $offer->effectivePrice(),
+                'payment_method' => $paymentMethod,
                 'status' => PaymentStatus::Pending,
             ],
         );
@@ -146,6 +151,7 @@ class CheckoutUpsellController extends Controller
                 $order,
                 $gateway->amountAsInt((string) $offer->effectivePrice()),
                 $merchantOrderId,
+                $paymentMethod,
                 route('webhooks.duitku'),
                 route('public.checkout.return', $funnel),
             );
@@ -155,7 +161,7 @@ class CheckoutUpsellController extends Controller
             abort(503, 'Pembayaran sedang tidak tersedia, silakan coba lagi beberapa saat lagi.');
         }
 
-        return redirect()->away((string) $transaction['paymentUrl']);
+        return Inertia::location((string) $transaction['paymentUrl']);
     }
 
     private function ensureOfferBelongsToFunnel(Funnel $funnel, FunnelOffer $offer): void

@@ -49,4 +49,15 @@ class PaymentSetting extends Model
             ? 'https://passport.duitku.com/webapi/api/merchant/v2'
             : 'https://sandbox.duitku.com/webapi/api/merchant/v2';
     }
+
+    /**
+     * The payment-method-list endpoint lives outside the /v2 prefix used by
+     * the rest of the merchant API.
+     */
+    public function paymentMethodApiUrl(): string
+    {
+        return $this->environment === PaymentEnvironment::Production
+            ? 'https://passport.duitku.com/webapi/api/merchant'
+            : 'https://sandbox.duitku.com/webapi/api/merchant';
+    }
 }
