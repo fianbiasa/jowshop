@@ -57,3 +57,43 @@ export const CTA_BUTTON_CLASS: Record<Style, string> = {
     editorial:
         'inline-flex items-center justify-center rounded-none border-2 border-stone-900 px-10 py-4 text-lg font-medium text-stone-900 transition-colors hover:bg-stone-900 hover:text-white',
 };
+
+/**
+ * A de-emphasized secondary action (e.g. "decline this offer") that should
+ * never visually compete with CTA_BUTTON_CLASS.
+ */
+export const SECONDARY_BUTTON_CLASS: Record<Style, string> = {
+    minimal:
+        'inline-flex items-center justify-center rounded-md border px-8 py-3 text-muted-foreground transition-colors hover:bg-muted',
+    bold: 'text-sm font-medium text-stone-500 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-stone-700',
+    editorial:
+        'text-sm text-stone-500 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-stone-800',
+};
+
+/** A themed highlight box for a single product/price callout (bump/upsell/downsell offers). */
+export const OFFER_CARD_CLASS: Record<Style, string> = {
+    minimal:
+        'mx-auto max-w-xl rounded-lg border bg-muted/30 p-6 text-lg font-semibold',
+    bold: 'mx-auto max-w-xl rounded-xl border-2 border-amber-200 bg-amber-50 p-6 text-lg font-bold text-stone-900 shadow-sm',
+    editorial:
+        'mx-auto max-w-xl border border-stone-200 p-6 text-lg font-medium text-stone-900',
+};
+
+/** Structural, not theme-dependent — a forced crop container for image/video blocks. */
+export const ASPECT_RATIO_CLASS: Record<string, string> = {
+    '16:9': 'aspect-video',
+    '9:16': 'aspect-[9/16]',
+};
+
+export const DIVIDER_CLASS: Record<Style, string> = {
+    minimal: 'mx-auto max-w-xl border-t',
+    bold: 'mx-auto max-w-xl border-t-2 border-amber-200',
+    editorial: 'mx-auto max-w-xs border-t border-stone-300',
+};
+
+/** Structural, not theme-dependent — a plain vertical gap. */
+export const SPACER_HEIGHT_CLASS: Record<string, string> = {
+    sm: 'h-4',
+    md: 'h-8',
+    lg: 'h-16',
+};

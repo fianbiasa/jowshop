@@ -57,7 +57,7 @@ class CheckoutController extends Controller
         $funnel->load('product');
 
         return Inertia::render('public/checkout', [
-            'metaPixel' => $this->metaPixelProp($funnel->fbPixelId(), $viewEvent),
+            'metaPixel' => $this->metaPixelProp($this->effectivePixelId($funnel), $viewEvent),
             'funnel' => ['name' => $funnel->name, 'slug' => $funnel->slug],
             'product' => [
                 'name' => $funnel->product->name,
@@ -251,7 +251,7 @@ class CheckoutController extends Controller
             throw new NotFoundHttpException;
         }
 
-        $order = Order::query()->with('items.product')->findOrFail($orderId);
+        $order = Order::query()->with(['items.product', 'customer'])->findOrFail($orderId);
 
         $session = $tracker->resolveSession($request, $funnel);
 
@@ -275,8 +275,15 @@ class CheckoutController extends Controller
             $this->offerSessionKey($funnel),
         ]);
 
+        // The buyer's session already owns this order (it was just checked
+        // out in it), so granting order-lookup access here is the same
+        // trust level already established, not a new escalation — it lets
+        // the thank-you page link straight into "Cek Status Pesanan"
+        // without asking the buyer to re-enter their email/order number.
+        $request->session()->put("order_lookup.{$order->id}", true);
+
         return Inertia::render('public/checkout-return', [
-            'metaPixel' => $this->metaPixelProp($funnel->fbPixelId(), $paymentSuccessEvent, $order),
+            'metaPixel' => $this->metaPixelProp($this->effectivePixelId($funnel), $paymentSuccessEvent, $order),
             'funnel' => ['name' => $funnel->name],
             'order' => [
                 'order_number' => $order->order_number,
@@ -286,9 +293,12 @@ class CheckoutController extends Controller
                     'product_name' => $item->product->name,
                     'quantity' => $item->quantity,
                     'unit_price' => $item->unit_price,
+                    'is_digital' => $item->product->isDigital(),
                 ]),
             ],
             'thankYouMessage' => $funnel->thank_you_content['message'] ?? null,
+            'customerEmail' => $order->customer->email,
+            'orderLookupUrl' => route('order-lookup.show', $order->order_number),
         ]);
     }
 

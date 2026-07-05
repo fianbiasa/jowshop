@@ -77,17 +77,20 @@ class FunnelSession extends Model
     }
 
     /**
-     * Record a funnel event for this session, generating a server-side
-     * external_event_id used later for Meta Pixel/CAPI deduplication.
+     * Record a funnel event for this session, used later for Meta Pixel/CAPI
+     * deduplication. Generates the external_event_id server-side unless the
+     * caller supplies one (e.g. a client-generated ID for an accept action
+     * that also fires the browser pixel immediately, before the server
+     * event exists — see CheckoutOfferController::respond()).
      *
      * @param  array<string, mixed>  $metadata
      */
-    public function recordEvent(FunnelEventType $type, ?FunnelOffer $offer = null, array $metadata = []): FunnelEvent
+    public function recordEvent(FunnelEventType $type, ?FunnelOffer $offer = null, array $metadata = [], ?string $externalEventId = null): FunnelEvent
     {
         return $this->events()->create([
             'funnel_offer_id' => $offer?->id,
             'event_type' => $type,
-            'external_event_id' => (string) Str::uuid(),
+            'external_event_id' => $externalEventId ?? (string) Str::uuid(),
             'metadata' => $metadata === [] ? null : $metadata,
             'occurred_at' => now(),
         ]);

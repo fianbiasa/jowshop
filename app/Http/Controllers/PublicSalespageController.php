@@ -32,7 +32,7 @@ class PublicSalespageController extends Controller
         $viewEvent = $session->events()->where('event_type', FunnelEventType::SalespageView)->first();
 
         return Inertia::render('public/salespage-view', [
-            'metaPixel' => $this->metaPixelProp($funnel->fbPixelId(), $viewEvent),
+            'metaPixel' => $this->metaPixelProp($this->effectivePixelId($funnel), $viewEvent),
             'funnel' => [
                 'name' => $funnel->name,
                 'slug' => $funnel->slug,

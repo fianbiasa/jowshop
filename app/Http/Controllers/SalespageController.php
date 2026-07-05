@@ -11,6 +11,7 @@ use App\Models\AiProviderSetting;
 use App\Models\Funnel;
 use App\Support\ContentBlockSanitizer;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -40,10 +41,11 @@ class SalespageController extends Controller
     public function update(UpdateSalespageRequest $request, Funnel $funnel): RedirectResponse
     {
         $validated = $request->validated();
+        $content = $this->resolveMediaUploads($request, $validated['content']);
 
         $funnel->salespage()->updateOrCreate([], [
             'title' => $validated['title'],
-            'content' => ContentBlockSanitizer::sanitize($validated['content']),
+            'content' => ContentBlockSanitizer::sanitize($content),
             'style' => $validated['style'],
             'seo_title' => $validated['seo_title'] ?? null,
             'seo_description' => $validated['seo_description'] ?? null,
@@ -54,6 +56,47 @@ class SalespageController extends Controller
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Salespage saved.')]);
 
         return to_route('funnels.salespage.edit', $funnel);
+    }
+
+    /**
+     * Store any newly uploaded image/video files for content blocks — the
+     * editor sends a raw File object nested in `content.*.data.file` when
+     * the admin picks a file to upload (Inertia serializes it into a
+     * multipart field automatically) — and swap it for the resulting
+     * public URL. Blocks that don't carry a `file` are left untouched.
+     *
+     * File validation is deliberately kept out of `salespageRules()` and run
+     * here as its own scoped `validate()` call instead: adding a
+     * `content.*.data.file` rule alongside `content.*.data` there causes
+     * Laravel's `validated()` to treat the deeper wildcard rule as
+     * authoritative and drop every other sibling key under `data` (text,
+     * items, url, ...) that has no rule of its own.
+     *
+     * @param  array<int, array<string, mixed>>  $content
+     * @return array<int, array<string, mixed>>
+     */
+    private function resolveMediaUploads(UpdateSalespageRequest $request, array $content): array
+    {
+        $request->validate([
+            'content.*.data.file' => ['nullable', 'file', 'max:51200'],
+        ]);
+
+        foreach ($content as $index => &$block) {
+            if (! is_array($block['data'] ?? null)) {
+                continue;
+            }
+
+            if ($request->hasFile("content.{$index}.data.file")) {
+                $path = $request->file("content.{$index}.data.file")->store('salespage-media', 'public');
+                $block['data']['url'] = Storage::disk('public')->url($path);
+            }
+
+            unset($block['data']['file']);
+        }
+
+        unset($block);
+
+        return $content;
     }
 
     /**

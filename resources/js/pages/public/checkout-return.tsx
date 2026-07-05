@@ -1,4 +1,5 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
+import { Mail, Package } from 'lucide-react';
 import MetaPixel from '@/components/meta-pixel';
 import type { MetaPixelEvent } from '@/components/meta-pixel';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +12,13 @@ type OrderStatus =
     | 'completed'
     | 'cancelled'
     | 'expired';
+
+const NEXT_STEPS_STATUSES: OrderStatus[] = [
+    'paid',
+    'processing',
+    'shipped',
+    'completed',
+];
 
 function formatPrice(price: string) {
     return new Intl.NumberFormat('id-ID', {
@@ -48,17 +56,30 @@ export default function CheckoutReturn({
     order,
     thankYouMessage,
     metaPixel,
+    customerEmail,
+    orderLookupUrl,
 }: {
     funnel: { name: string };
     order: {
         order_number: string;
         status: OrderStatus;
         total: string;
-        items: { product_name: string; quantity: number; unit_price: string }[];
+        items: {
+            product_name: string;
+            quantity: number;
+            unit_price: string;
+            is_digital: boolean;
+        }[];
     };
     thankYouMessage: string | null;
     metaPixel: MetaPixelEvent | null;
+    customerEmail: string;
+    orderLookupUrl: string;
 }) {
+    const showNextSteps = NEXT_STEPS_STATUSES.includes(order.status);
+    const hasDigitalItem = order.items.some((item) => item.is_digital);
+    const hasPhysicalItem = order.items.some((item) => !item.is_digital);
+
     return (
         <>
             <Head title={`Status Pesanan — ${funnel.name}`} />
@@ -112,6 +133,45 @@ export default function CheckoutReturn({
                         <span>{formatPrice(order.total)}</span>
                     </div>
                 </div>
+
+                {showNextSteps && (
+                    <div className="space-y-4 rounded-lg border bg-muted/30 p-6 text-left">
+                        <h2 className="font-semibold">Langkah Selanjutnya</h2>
+
+                        {hasDigitalItem && (
+                            <div className="flex gap-3 text-sm">
+                                <Mail className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                                <p>
+                                    Produk digital: cek email di{' '}
+                                    <span className="font-medium">
+                                        {customerEmail}
+                                    </span>{' '}
+                                    untuk link download, lisensi (jika ada), dan
+                                    instruksi akses. Link berlaku 30 hari sejak
+                                    dikirim.
+                                </p>
+                            </div>
+                        )}
+
+                        {hasPhysicalItem && (
+                            <div className="flex gap-3 text-sm">
+                                <Package className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                                <p>
+                                    Produk fisik: pesananmu sedang kami siapkan.
+                                    Nomor resi akan dikirim ke email begitu
+                                    paket dikirim.
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                <Link
+                    href={orderLookupUrl}
+                    className="inline-flex items-center justify-center rounded-md border px-6 py-2.5 text-sm font-medium transition-colors hover:bg-muted"
+                >
+                    Cek Status Pesanan
+                </Link>
             </main>
         </>
     );

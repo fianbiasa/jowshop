@@ -3,16 +3,17 @@
 namespace Tests\Feature;
 
 use App\Enums\FunnelEventType;
-use App\Enums\FunnelSessionStatus;
 use App\Enums\OfferTriggerCondition;
 use App\Models\Customer;
 use App\Models\Funnel;
 use App\Models\FunnelOffer;
 use App\Models\FunnelSession;
+use App\Models\MetaCapiSetting;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Salespage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class CheckoutFlowTest extends TestCase
@@ -286,5 +287,38 @@ class CheckoutFlowTest extends TestCase
         $response = $this->get("/f/{$funnel->slug}/checkout/bayar");
 
         $response->assertNotFound();
+    }
+
+    public function test_accepting_a_bump_uses_the_client_supplied_event_id_for_meta_dedup(): void
+    {
+        $funnel = $this->publishedFunnel('digital');
+        $bump = FunnelOffer::factory()->for($funnel)->bump()->create(['sequence' => 1]);
+
+        $this->post("/f/{$funnel->slug}/checkout", $this->buyerPayload());
+
+        $eventId = (string) Str::uuid();
+
+        $this->post("/f/{$funnel->slug}/checkout/offers/{$bump->id}", [
+            'response' => 'accepted',
+            'event_id' => $eventId,
+        ]);
+
+        $session = FunnelSession::query()->firstOrFail();
+        $event = $session->events()->where('event_type', FunnelEventType::BumpAccepted)->firstOrFail();
+
+        $this->assertSame($eventId, $event->external_event_id);
+    }
+
+    public function test_bump_offer_page_exposes_pixel_id_falling_back_to_global_meta_capi_settings(): void
+    {
+        MetaCapiSetting::factory()->create(['pixel_id' => '999888777', 'is_active' => true]);
+        $funnel = $this->publishedFunnel('digital');
+        $bump = FunnelOffer::factory()->for($funnel)->bump()->create(['sequence' => 1]);
+
+        $this->post("/f/{$funnel->slug}/checkout", $this->buyerPayload());
+
+        $response = $this->get("/f/{$funnel->slug}/checkout/offers/{$bump->id}");
+
+        $response->assertInertia(fn ($page) => $page->where('pixelId', '999888777'));
     }
 }

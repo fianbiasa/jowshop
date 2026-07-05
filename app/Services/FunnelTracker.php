@@ -57,13 +57,13 @@ class FunnelTracker
      *
      * @param  array<string, mixed>  $metadata
      */
-    public function recordOnce(FunnelSession $session, FunnelEventType $type, ?FunnelOffer $offer = null, array $metadata = []): ?FunnelEvent
+    public function recordOnce(FunnelSession $session, FunnelEventType $type, ?FunnelOffer $offer = null, array $metadata = [], ?string $externalEventId = null): ?FunnelEvent
     {
         if ($session->hasEvent($type, $offer)) {
             return null;
         }
 
-        $event = $session->recordEvent($type, $offer, $metadata);
+        $event = $session->recordEvent($type, $offer, $metadata, $externalEventId);
 
         SendMetaConversionEvent::dispatch($event->id)->afterResponse();
 

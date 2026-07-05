@@ -2,12 +2,15 @@ import { Head, Link } from '@inertiajs/react';
 import MetaPixel from '@/components/meta-pixel';
 import type { MetaPixelEvent } from '@/components/meta-pixel';
 import {
+    ASPECT_RATIO_CLASS,
     CTA_BUTTON_CLASS,
+    DIVIDER_CLASS,
     GUARANTEE_CLASS,
     HEADLINE_CLASS,
     KICKER_CLASS,
     MAIN_CLASS,
     PAGE_BG_CLASS,
+    SPACER_HEIGHT_CLASS,
     SUBHEADLINE_CLASS,
 } from '@/lib/salespage-themes';
 import { show as showCheckout } from '@/routes/public/checkout';
@@ -21,7 +24,31 @@ type Block =
     | { type: 'faq'; data: { items: { question: string; answer: string }[] } }
     | { type: 'guarantee'; data: { text: string } }
     | { type: 'cta'; data: { label: string } }
+    | {
+          type: 'image';
+          data: { url: string; alt: string; aspect_ratio: string | null };
+      }
+    | {
+          type: 'video';
+          data: { source: string; url: string; aspect_ratio: string | null };
+      }
+    | { type: 'divider'; data: Record<string, never> }
+    | { type: 'spacer'; data: { height: string } }
     | { type: string; data: Record<string, unknown> };
+
+function getYoutubeEmbedUrl(url: string): string | null {
+    const match = url.match(
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/,
+    );
+
+    return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+}
+
+function getVimeoEmbedUrl(url: string): string | null {
+    const match = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+
+    return match ? `https://player.vimeo.com/video/${match[1]}` : null;
+}
 
 function formatPrice(price: string) {
     return new Intl.NumberFormat('id-ID', {
@@ -100,7 +127,10 @@ function Testimonial({
     if (style === 'editorial') {
         return (
             <div className="mx-auto max-w-2xl text-center">
-                <div aria-hidden className="text-6xl leading-none text-stone-200">
+                <div
+                    aria-hidden
+                    className="text-6xl leading-none text-stone-200"
+                >
                     "
                 </div>
                 <p className="mt-2 text-2xl leading-relaxed text-stone-800 italic">
@@ -181,6 +211,99 @@ function Faq({
     );
 }
 
+function ImageBlock({
+    url,
+    alt,
+    aspectRatio,
+}: {
+    url: string;
+    alt: string;
+    aspectRatio: string | null;
+}) {
+    if (!url) {
+        return null;
+    }
+
+    const ratioClass = aspectRatio ? ASPECT_RATIO_CLASS[aspectRatio] : '';
+
+    return (
+        <div
+            className={`mx-auto max-w-2xl overflow-hidden rounded-lg ${ratioClass}`}
+        >
+            <img
+                src={url}
+                alt={alt}
+                className={`h-full w-full ${ratioClass ? 'object-cover' : ''}`}
+            />
+        </div>
+    );
+}
+
+function VideoBlock({
+    source,
+    url,
+    aspectRatio,
+}: {
+    source: string;
+    url: string;
+    aspectRatio: string | null;
+}) {
+    if (!url) {
+        return null;
+    }
+
+    const ratioClass = aspectRatio
+        ? ASPECT_RATIO_CLASS[aspectRatio]
+        : 'aspect-video';
+
+    if (source === 'file') {
+        return (
+            <div
+                className={`mx-auto max-w-2xl overflow-hidden rounded-lg ${ratioClass}`}
+            >
+                <video
+                    src={url}
+                    controls
+                    className="h-full w-full object-cover"
+                />
+            </div>
+        );
+    }
+
+    const embedUrl =
+        source === 'vimeo' ? getVimeoEmbedUrl(url) : getYoutubeEmbedUrl(url);
+
+    if (!embedUrl) {
+        return null;
+    }
+
+    return (
+        <div
+            className={`mx-auto max-w-2xl overflow-hidden rounded-lg ${ratioClass}`}
+        >
+            <iframe
+                src={embedUrl}
+                className="h-full w-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+            />
+        </div>
+    );
+}
+
+function Divider({ style }: { style: Style }) {
+    return <hr className={DIVIDER_CLASS[style]} />;
+}
+
+function Spacer({ height }: { height: string }) {
+    return (
+        <div
+            aria-hidden
+            className={SPACER_HEIGHT_CLASS[height] ?? SPACER_HEIGHT_CLASS.md}
+        />
+    );
+}
+
 function BlockRenderer({
     block,
     funnelSlug,
@@ -256,6 +379,39 @@ function BlockRenderer({
                     </Link>
                 </div>
             );
+        case 'image': {
+            const { url, alt, aspect_ratio } = block.data as {
+                url: string;
+                alt: string;
+                aspect_ratio: string | null;
+            };
+
+            return (
+                <ImageBlock url={url} alt={alt} aspectRatio={aspect_ratio} />
+            );
+        }
+        case 'video': {
+            const { source, url, aspect_ratio } = block.data as {
+                source: string;
+                url: string;
+                aspect_ratio: string | null;
+            };
+
+            return (
+                <VideoBlock
+                    source={source}
+                    url={url}
+                    aspectRatio={aspect_ratio}
+                />
+            );
+        }
+        case 'divider':
+            return <Divider style={style} />;
+        case 'spacer': {
+            const { height } = block.data as { height: string };
+
+            return <Spacer height={height} />;
+        }
         default:
             return null;
     }

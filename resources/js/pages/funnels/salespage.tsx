@@ -31,7 +31,11 @@ import type {
 import SalespageStylePicker from './salespage-style-picker';
 
 type BlockDataValue =
-    string | string[] | Array<{ question: string; answer: string }>;
+    | string
+    | string[]
+    | Array<{ question: string; answer: string }>
+    | File
+    | null;
 type BlockData = Record<string, BlockDataValue>;
 type Block = { type: string; data: BlockData };
 
@@ -43,6 +47,10 @@ const blockLabels: Record<string, string> = {
     faq: 'FAQ',
     guarantee: 'Garansi',
     cta: 'Call to Action',
+    image: 'Gambar',
+    video: 'Video',
+    divider: 'Divider',
+    spacer: 'Spacer',
 };
 
 function defaultDataForType(type: string): BlockData {
@@ -59,9 +67,44 @@ function defaultDataForType(type: string): BlockData {
             return { items: [{ question: '', answer: '' }] };
         case 'cta':
             return { label: '' };
+        case 'image':
+            return { url: '', file: null, aspect_ratio: null, alt: '' };
+        case 'video':
+            return {
+                source: 'youtube',
+                url: '',
+                file: null,
+                aspect_ratio: '16:9',
+            };
+        case 'spacer':
+            return { height: 'md' };
         default:
             return {};
     }
+}
+
+function AspectRatioSelect({
+    value,
+    onChange,
+}: {
+    value: string | null;
+    onChange: (value: string | null) => void;
+}) {
+    return (
+        <Select
+            value={value ?? 'auto'}
+            onValueChange={(next) => onChange(next === 'auto' ? null : next)}
+        >
+            <SelectTrigger className="w-48">
+                <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem value="auto">Rasio Asli</SelectItem>
+                <SelectItem value="16:9">16:9 (Landscape)</SelectItem>
+                <SelectItem value="9:16">9:16 (Portrait)</SelectItem>
+            </SelectContent>
+        </Select>
+    );
 }
 
 function BlockEditor({
@@ -191,6 +234,126 @@ function BlockEditor({
                 </div>
             );
         }
+        case 'image':
+            return (
+                <div className="space-y-2">
+                    <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) =>
+                            onChange({
+                                ...block.data,
+                                file: e.target.files?.[0] ?? null,
+                            })
+                        }
+                    />
+                    <Input
+                        value={(block.data.url as string) ?? ''}
+                        onChange={(e) =>
+                            onChange({
+                                ...block.data,
+                                url: e.target.value,
+                                file: null,
+                            })
+                        }
+                        placeholder="...atau paste URL gambar"
+                    />
+                    <Input
+                        value={(block.data.alt as string) ?? ''}
+                        onChange={(e) =>
+                            onChange({ ...block.data, alt: e.target.value })
+                        }
+                        placeholder="Teks alternatif (alt)"
+                    />
+                    <AspectRatioSelect
+                        value={(block.data.aspect_ratio as string) ?? null}
+                        onChange={(value) =>
+                            onChange({ ...block.data, aspect_ratio: value })
+                        }
+                    />
+                </div>
+            );
+        case 'video': {
+            const source = (block.data.source as string) ?? 'youtube';
+
+            return (
+                <div className="space-y-2">
+                    <Select
+                        value={source}
+                        onValueChange={(value) =>
+                            onChange({ ...block.data, source: value })
+                        }
+                    >
+                        <SelectTrigger className="w-full">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="youtube">
+                                Link YouTube
+                            </SelectItem>
+                            <SelectItem value="vimeo">Link Vimeo</SelectItem>
+                            <SelectItem value="file">Upload File</SelectItem>
+                        </SelectContent>
+                    </Select>
+
+                    {source === 'file' ? (
+                        <Input
+                            type="file"
+                            accept="video/*"
+                            onChange={(e) =>
+                                onChange({
+                                    ...block.data,
+                                    file: e.target.files?.[0] ?? null,
+                                })
+                            }
+                        />
+                    ) : (
+                        <Input
+                            value={(block.data.url as string) ?? ''}
+                            onChange={(e) =>
+                                onChange({
+                                    ...block.data,
+                                    url: e.target.value,
+                                })
+                            }
+                            placeholder="https://youtube.com/watch?v=..."
+                        />
+                    )}
+
+                    <AspectRatioSelect
+                        value={(block.data.aspect_ratio as string) ?? '16:9'}
+                        onChange={(value) =>
+                            onChange({
+                                ...block.data,
+                                aspect_ratio: value ?? '16:9',
+                            })
+                        }
+                    />
+                </div>
+            );
+        }
+        case 'divider':
+            return (
+                <p className="text-sm text-muted-foreground">
+                    Tidak perlu pengaturan — garis pemisah tampil otomatis.
+                </p>
+            );
+        case 'spacer':
+            return (
+                <Select
+                    value={(block.data.height as string) ?? 'md'}
+                    onValueChange={(value) => onChange({ height: value })}
+                >
+                    <SelectTrigger className="w-48">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="sm">Kecil</SelectItem>
+                        <SelectItem value="md">Sedang</SelectItem>
+                        <SelectItem value="lg">Besar</SelectItem>
+                    </SelectContent>
+                </Select>
+            );
         default:
             return null;
     }

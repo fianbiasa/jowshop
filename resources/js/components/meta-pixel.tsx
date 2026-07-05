@@ -59,6 +59,23 @@ function loadPixelScript(pixelId: string) {
 }
 
 /**
+ * Fire a browser-side Facebook Pixel event outside the page-load-driven
+ * <MetaPixel> flow below — e.g. on a button click, immediately, rather than
+ * waiting for the next page render. Pass the same `eventId` used for the
+ * matching server-side CAPI send (see SharesMetaPixelProp) so Meta can
+ * deduplicate the two into a single counted event.
+ */
+export function trackMetaPixelEvent(
+    pixelId: string,
+    eventName: string,
+    eventId: string,
+    customData?: { value: number; currency: string },
+) {
+    loadPixelScript(pixelId);
+    window.fbq?.('track', eventName, customData, { eventID: eventId });
+}
+
+/**
  * Fires the browser-side Facebook Pixel event that matches a server-side
  * Conversions API send, using the same `event_id` for Meta's official
  * Pixel/CAPI deduplication.

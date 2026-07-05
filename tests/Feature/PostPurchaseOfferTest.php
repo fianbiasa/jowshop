@@ -9,6 +9,7 @@ use App\Enums\OrderItemType;
 use App\Models\Funnel;
 use App\Models\FunnelOffer;
 use App\Models\FunnelSession;
+use App\Models\MetaCapiSetting;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PaymentSetting;
@@ -16,6 +17,7 @@ use App\Models\Product;
 use App\Models\Salespage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class PostPurchaseOfferTest extends TestCase
@@ -91,6 +93,118 @@ class PostPurchaseOfferTest extends TestCase
         ]);
 
         return $order->fresh();
+    }
+
+    public function test_bump_offer_page_uses_the_funnels_salespage_style(): void
+    {
+        $product = Product::factory()->digital()->published()->create(['price' => 45000]);
+        $funnel = Funnel::factory()->published()->create(['product_id' => $product->id, 'slug' => 'kopi']);
+        Salespage::factory()->published()->create(['funnel_id' => $funnel->id, 'style' => 'bold']);
+        $bump = FunnelOffer::factory()->for($funnel)->bump()->create(['sequence' => 1]);
+
+        $this->post("/f/{$funnel->slug}/checkout", [
+            'name' => 'Budi Santoso',
+            'email' => 'budi@example.com',
+            'phone' => '081234567890',
+        ]);
+
+        $response = $this->get("/f/{$funnel->slug}/checkout/offers/{$bump->id}");
+
+        $response->assertInertia(fn ($page) => $page
+            ->component('public/checkout-offer')
+            ->where('style', 'bold')
+        );
+    }
+
+    public function test_upsell_offer_page_uses_the_funnels_salespage_style(): void
+    {
+        PaymentSetting::factory()->create();
+        $this->fakeDuitkuPaymentMethods();
+        $this->fakeDuitkuInquiry();
+
+        $product = Product::factory()->digital()->published()->create(['price' => 45000]);
+        $funnel = Funnel::factory()->published()->create(['product_id' => $product->id, 'slug' => 'kopi']);
+        Salespage::factory()->published()->create(['funnel_id' => $funnel->id, 'style' => 'editorial']);
+        $upsell = FunnelOffer::factory()->for($funnel)->upsell()->create(['sequence' => 1]);
+
+        $this->payAndConfirmMainOrder($funnel);
+        $this->get("/f/{$funnel->slug}/checkout/kembali");
+
+        $response = $this->get("/f/{$funnel->slug}/upsell/{$upsell->id}");
+
+        $response->assertInertia(fn ($page) => $page
+            ->component('public/checkout-upsell')
+            ->where('style', 'editorial')
+        );
+    }
+
+    public function test_accepting_an_upsell_uses_the_client_supplied_event_id_for_meta_dedup(): void
+    {
+        PaymentSetting::factory()->create();
+        $this->fakeDuitkuPaymentMethods();
+        $this->fakeDuitkuInquiry();
+
+        $funnel = $this->publishedFunnel();
+        $upsell = FunnelOffer::factory()->for($funnel)->upsell()->create(['sequence' => 1]);
+
+        $this->payAndConfirmMainOrder($funnel);
+        $this->get("/f/{$funnel->slug}/checkout/kembali");
+
+        $eventId = (string) Str::uuid();
+
+        $this->post("/f/{$funnel->slug}/upsell/{$upsell->id}", [
+            'response' => 'accepted',
+            'event_id' => $eventId,
+        ]);
+
+        $session = FunnelSession::query()->firstOrFail();
+        $event = $session->events()->where('event_type', FunnelEventType::UpsellAccepted)->firstOrFail();
+
+        $this->assertSame($eventId, $event->external_event_id);
+    }
+
+    public function test_upsell_offer_page_exposes_pixel_id_falling_back_to_global_meta_capi_settings(): void
+    {
+        MetaCapiSetting::factory()->create(['pixel_id' => '999888777', 'is_active' => true]);
+        PaymentSetting::factory()->create();
+        $this->fakeDuitkuPaymentMethods();
+        $this->fakeDuitkuInquiry();
+
+        $funnel = $this->publishedFunnel();
+        $upsell = FunnelOffer::factory()->for($funnel)->upsell()->create(['sequence' => 1]);
+
+        $this->payAndConfirmMainOrder($funnel);
+        $this->get("/f/{$funnel->slug}/checkout/kembali");
+
+        $response = $this->get("/f/{$funnel->slug}/upsell/{$upsell->id}");
+
+        $response->assertInertia(fn ($page) => $page->where('pixelId', '999888777'));
+    }
+
+    public function test_return_page_includes_next_step_props_and_grants_order_lookup_access(): void
+    {
+        PaymentSetting::factory()->create();
+        $this->fakeDuitkuPaymentMethods();
+        $this->fakeDuitkuInquiry();
+
+        $funnel = $this->publishedFunnel('digital');
+        $order = $this->payAndConfirmMainOrder($funnel);
+
+        $response = $this->get("/f/{$funnel->slug}/checkout/kembali");
+
+        $response->assertInertia(fn ($page) => $page
+            ->component('public/checkout-return')
+            ->where('order.items.0.is_digital', true)
+            ->where('customerEmail', 'budi@example.com')
+            ->where('orderLookupUrl', route('order-lookup.show', $order->order_number))
+        );
+
+        // The checkout session already owns this order, so the thank-you
+        // page should be able to grant order-lookup access without the
+        // buyer re-entering their email/order number.
+        $lookupResponse = $this->get("/pesanan-saya/{$order->order_number}");
+        $lookupResponse->assertOk();
+        $lookupResponse->assertInertia(fn ($page) => $page->component('public/order-lookup-result'));
     }
 
     public function test_return_page_without_upsell_offers_finalizes_immediately(): void

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\FunnelStatus;
 use App\Models\Funnel;
+use App\Models\MetaCapiSetting;
 use App\Models\Salespage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -55,6 +56,41 @@ class PublicSalespageTest extends TestCase
         $response = $this->get('/f/tidak-ada');
 
         $response->assertNotFound();
+    }
+
+    public function test_browser_pixel_falls_back_to_global_meta_capi_settings_when_funnel_has_no_pixel_id(): void
+    {
+        MetaCapiSetting::factory()->create(['pixel_id' => '999888777', 'is_active' => true]);
+        $funnel = Funnel::factory()->published()->create(['slug' => 'kopi-robusta']);
+        Salespage::factory()->published()->create(['funnel_id' => $funnel->id]);
+
+        $response = $this->get('/f/kopi-robusta');
+
+        $response->assertInertia(fn ($page) => $page->where('metaPixel.pixel_id', '999888777'));
+    }
+
+    public function test_browser_pixel_prefers_the_funnels_own_pixel_id_over_the_global_setting(): void
+    {
+        MetaCapiSetting::factory()->create(['pixel_id' => '999888777', 'is_active' => true]);
+        $funnel = Funnel::factory()->published()->create([
+            'slug' => 'kopi-robusta',
+            'pixel_settings' => ['fb_pixel_id' => '111222333'],
+        ]);
+        Salespage::factory()->published()->create(['funnel_id' => $funnel->id]);
+
+        $response = $this->get('/f/kopi-robusta');
+
+        $response->assertInertia(fn ($page) => $page->where('metaPixel.pixel_id', '111222333'));
+    }
+
+    public function test_browser_pixel_is_absent_when_no_pixel_is_configured_anywhere(): void
+    {
+        $funnel = Funnel::factory()->published()->create(['slug' => 'kopi-robusta']);
+        Salespage::factory()->published()->create(['funnel_id' => $funnel->id]);
+
+        $response = $this->get('/f/kopi-robusta');
+
+        $response->assertInertia(fn ($page) => $page->where('metaPixel', null));
     }
 
     /**

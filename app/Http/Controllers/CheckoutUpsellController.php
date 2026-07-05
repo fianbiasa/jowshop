@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Concerns\ManagesCheckoutSession;
+use App\Concerns\SharesMetaPixelProp;
 use App\Enums\FunnelEventType;
 use App\Enums\OfferStage;
 use App\Enums\OfferTriggerCondition;
 use App\Enums\OrderItemType;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
+use App\Enums\SalespageStyle;
 use App\Exceptions\PaymentGatewayException;
 use App\Models\Funnel;
 use App\Models\FunnelOffer;
@@ -26,7 +28,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class CheckoutUpsellController extends Controller
 {
-    use ManagesCheckoutSession;
+    use ManagesCheckoutSession, SharesMetaPixelProp;
 
     /**
      * Show a single post-purchase upsell/downsell offer.
@@ -45,9 +47,12 @@ class CheckoutUpsellController extends Controller
         );
 
         $offer->load('product');
+        $funnel->loadMissing('salespage');
 
         return Inertia::render('public/checkout-upsell', [
             'funnel' => ['name' => $funnel->name, 'slug' => $funnel->slug],
+            'style' => $funnel->salespage?->style ?? SalespageStyle::Minimal,
+            'pixelId' => $this->effectivePixelId($funnel),
             'order' => ['order_number' => $order->order_number],
             'offer' => [
                 'id' => $offer->id,
@@ -79,6 +84,7 @@ class CheckoutUpsellController extends Controller
 
         $validated = $request->validate([
             'response' => ['required', Rule::in(['accepted', 'declined'])],
+            'event_id' => ['nullable', 'string', 'uuid'],
         ]);
 
         $order = $this->paidOrderFromSession($request, $funnel);
@@ -117,10 +123,16 @@ class CheckoutUpsellController extends Controller
             $order->recalculateTotals();
         }
 
+        // A client-generated event_id (see checkout-upsell.tsx) lets the
+        // browser fire the matching Meta Pixel "AddToCart" event immediately
+        // on click, deduplicated against this same server-side CAPI event
+        // via a shared event ID.
         $tracker->recordOnce(
             $session,
             $isUpsell ? FunnelEventType::UpsellAccepted : FunnelEventType::DownsellAccepted,
             $offer,
+            [],
+            $validated['event_id'] ?? null,
         );
 
         $settings = PaymentSetting::query()->where('is_active', true)->first();

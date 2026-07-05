@@ -9,7 +9,9 @@ use App\Models\Funnel;
 use App\Models\Salespage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class SalespageManagementTest extends TestCase
@@ -95,6 +97,81 @@ class SalespageManagementTest extends TestCase
 
         $salespage->refresh();
         $this->assertSame(SalespageStyle::Bold, $salespage->style);
+    }
+
+    public function test_uploading_an_image_block_stores_the_file_and_persists_its_public_url(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create();
+        $funnel = Funnel::factory()->for($user, 'creator')->create();
+        $file = UploadedFile::fake()->image('banner.jpg');
+
+        $response = $this->actingAs($user)->put(route('funnels.salespage.update', $funnel), [
+            'title' => 'Kopi Terbaik',
+            'content' => [
+                ['type' => 'image', 'data' => ['file' => $file, 'alt' => 'Banner', 'aspect_ratio' => '16:9']],
+            ],
+            'style' => 'minimal',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+
+        $storedFiles = Storage::disk('public')->allFiles('salespage-media');
+        $this->assertCount(1, $storedFiles);
+
+        $salespage = Salespage::query()->where('funnel_id', $funnel->id)->firstOrFail();
+        $imageBlock = $salespage->content[0];
+
+        $this->assertArrayNotHasKey('file', $imageBlock['data']);
+        $this->assertSame(Storage::disk('public')->url($storedFiles[0]), $imageBlock['data']['url']);
+    }
+
+    public function test_image_block_with_a_pasted_url_does_not_touch_storage(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create();
+        $funnel = Funnel::factory()->for($user, 'creator')->create();
+
+        $response = $this->actingAs($user)->put(route('funnels.salespage.update', $funnel), [
+            'title' => 'Kopi Terbaik',
+            'content' => [
+                ['type' => 'image', 'data' => ['url' => 'https://cdn.example.com/banner.jpg', 'alt' => 'Banner', 'aspect_ratio' => null]],
+            ],
+            'style' => 'minimal',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        Storage::disk('public')->assertDirectoryEmpty('salespage-media');
+
+        $salespage = Salespage::query()->where('funnel_id', $funnel->id)->firstOrFail();
+        $this->assertSame('https://cdn.example.com/banner.jpg', $salespage->content[0]['data']['url']);
+    }
+
+    public function test_video_divider_and_spacer_blocks_round_trip(): void
+    {
+        $user = User::factory()->create();
+        $funnel = Funnel::factory()->for($user, 'creator')->create();
+
+        $response = $this->actingAs($user)->put(route('funnels.salespage.update', $funnel), [
+            'title' => 'Kopi Terbaik',
+            'content' => [
+                ['type' => 'video', 'data' => ['source' => 'youtube', 'url' => 'https://youtu.be/dQw4w9WgXcQ', 'aspect_ratio' => '16:9']],
+                ['type' => 'divider', 'data' => []],
+                ['type' => 'spacer', 'data' => ['height' => 'lg']],
+            ],
+            'style' => 'minimal',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+
+        $salespage = Salespage::query()->where('funnel_id', $funnel->id)->firstOrFail();
+        $this->assertSame('video', $salespage->content[0]['type']);
+        $this->assertSame('https://youtu.be/dQw4w9WgXcQ', $salespage->content[0]['data']['url']);
+        $this->assertSame('divider', $salespage->content[1]['type']);
+        $this->assertSame('spacer', $salespage->content[2]['type']);
+        $this->assertSame('lg', $salespage->content[2]['data']['height']);
     }
 
     public function test_salespage_can_be_generated_by_ai(): void

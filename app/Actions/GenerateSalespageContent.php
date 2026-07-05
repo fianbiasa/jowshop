@@ -83,7 +83,8 @@ class GenerateSalespageContent
             $this->toneGuidanceFor($style),
             'Balas HANYA dengan JSON array (tanpa markdown code fence, tanpa teks lain) berisi blok-blok salespage.',
             'Setiap elemen array berbentuk {"type": "...", "data": {...}}.',
-            'Gunakan tipe blok berikut sesuai kebutuhan: headline ({"text"}), subheadline ({"text"}), benefit_list ({"items": [string]}), testimonial ({"name","quote"}), faq ({"items": [{"question","answer"}]}), guarantee ({"text"}), cta ({"label"}).',
+            'Gunakan tipe blok berikut sesuai kebutuhan: headline ({"text"}), subheadline ({"text"}), benefit_list ({"items": [string]}), testimonial ({"name","quote"}), faq ({"items": [{"question","answer"}]}), guarantee ({"text"}), cta ({"label"}), divider ({}), spacer ({"height": "sm"|"md"|"lg"}).',
+            'Jangan gunakan tipe blok "image" atau "video" — tidak ada aset gambar/video yang bisa dirujuk.',
         ]));
     }
 
