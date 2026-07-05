@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\Funnel;
 use App\Models\Order;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Order>
@@ -26,6 +27,7 @@ class OrderFactory extends Factory
             'funnel_id' => Funnel::factory(),
             'customer_id' => Customer::factory(),
             'order_number' => Order::generateOrderNumber(),
+            'payment_token' => Str::random(40),
             'subtotal' => $subtotal,
             'discount_total' => 0,
             'shipping_cost' => 0,

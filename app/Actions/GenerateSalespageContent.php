@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Enums\SalespageStyle;
 use App\Exceptions\AiGenerationException;
 use App\Models\AiGenerationLog;
 use App\Models\AiProviderSetting;
@@ -16,13 +17,15 @@ class GenerateSalespageContent
 
     /**
      * Generate (or regenerate) a funnel's salespage content using AI, logging
-     * the attempt regardless of outcome.
+     * the attempt regardless of outcome. The style is chosen by the admin
+     * beforehand (see SalespageStyle) — the AI only ever fills copy into one
+     * of the curated visual styles, it never invents its own design.
      *
      * @throws AiGenerationException if the AI provider request fails or returns unparsable content.
      */
-    public function __invoke(Funnel $funnel, AiProviderSetting $setting, ?string $brief = null): Salespage
+    public function __invoke(Funnel $funnel, AiProviderSetting $setting, SalespageStyle $style, ?string $brief = null): Salespage
     {
-        $prompt = $this->buildPrompt($funnel, $brief);
+        $prompt = $this->buildPrompt($funnel, $style, $brief);
         $rawContent = null;
 
         try {
@@ -35,6 +38,7 @@ class GenerateSalespageContent
                 [
                     'title' => $funnel->name,
                     'content' => $blocks,
+                    'style' => $style,
                     'generated_by_ai' => true,
                 ],
             );
@@ -66,7 +70,7 @@ class GenerateSalespageContent
         }
     }
 
-    private function buildPrompt(Funnel $funnel, ?string $brief): string
+    private function buildPrompt(Funnel $funnel, SalespageStyle $style, ?string $brief): string
     {
         $product = $funnel->product;
 
@@ -76,10 +80,25 @@ class GenerateSalespageContent
             $product?->description ? "Deskripsi produk: {$product->description}" : null,
             $product ? "Harga: Rp{$product->price}" : null,
             $brief ? "Brief tambahan dari admin: {$brief}" : null,
+            $this->toneGuidanceFor($style),
             'Balas HANYA dengan JSON array (tanpa markdown code fence, tanpa teks lain) berisi blok-blok salespage.',
             'Setiap elemen array berbentuk {"type": "...", "data": {...}}.',
             'Gunakan tipe blok berikut sesuai kebutuhan: headline ({"text"}), subheadline ({"text"}), benefit_list ({"items": [string]}), testimonial ({"name","quote"}), faq ({"items": [{"question","answer"}]}), guarantee ({"text"}), cta ({"label"}).',
         ]));
+    }
+
+    /**
+     * The visual style is fixed (chosen by the admin beforehand); this only
+     * nudges the copy's tone/length to match it so the generated content
+     * feels native to the style it'll be rendered in.
+     */
+    private function toneGuidanceFor(SalespageStyle $style): string
+    {
+        return match ($style) {
+            SalespageStyle::Bold => 'Gaya tulisan: mendesak dan penuh urgency/scarcity, kalimat pendek dan tegas, cocok untuk penawaran terbatas.',
+            SalespageStyle::Editorial => 'Gaya tulisan: storytelling naratif yang lebih panjang, mengalir seperti artikel, cocok untuk produk edukasi/kelas.',
+            SalespageStyle::Minimal => 'Gaya tulisan: singkat, padat, langsung ke inti, tanpa basa-basi berlebihan.',
+        };
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace Tests\Feature\Funnels;
 
 use App\Enums\AiProvider;
+use App\Enums\SalespageStyle;
 use App\Models\AiProviderSetting;
 use App\Models\Funnel;
 use App\Models\Salespage;
@@ -45,6 +46,7 @@ class SalespageManagementTest extends TestCase
                 ['type' => 'headline', 'data' => ['text' => 'Kopi Terbaik di Kota']],
                 ['type' => 'cta', 'data' => ['label' => 'Beli Sekarang']],
             ],
+            'style' => 'minimal',
             'is_published' => true,
         ]);
 
@@ -52,6 +54,7 @@ class SalespageManagementTest extends TestCase
 
         $salespage = Salespage::query()->where('funnel_id', $funnel->id)->firstOrFail();
         $this->assertSame('Kopi Terbaik', $salespage->title);
+        $this->assertSame(SalespageStyle::Minimal, $salespage->style);
         $this->assertFalse($salespage->generated_by_ai);
         $this->assertNotNull($salespage->published_at);
     }
@@ -66,10 +69,32 @@ class SalespageManagementTest extends TestCase
             'content' => [
                 ['type' => 'headline', 'data' => ['text' => '<script>alert(1)</script>Judul']],
             ],
+            'style' => 'minimal',
         ]);
 
         $salespage = Salespage::query()->where('funnel_id', $funnel->id)->firstOrFail();
         $this->assertStringNotContainsString('<script>', $salespage->content[0]['data']['text']);
+    }
+
+    public function test_salespage_style_can_be_changed_without_touching_content(): void
+    {
+        $user = User::factory()->create();
+        $funnel = Funnel::factory()->for($user, 'creator')->create();
+        $salespage = Salespage::factory()->create([
+            'funnel_id' => $funnel->id,
+            'style' => SalespageStyle::Minimal,
+        ]);
+
+        $response = $this->actingAs($user)->put(route('funnels.salespage.update', $funnel), [
+            'title' => $salespage->title,
+            'content' => $salespage->content,
+            'style' => 'bold',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+
+        $salespage->refresh();
+        $this->assertSame(SalespageStyle::Bold, $salespage->style);
     }
 
     public function test_salespage_can_be_generated_by_ai(): void
@@ -92,6 +117,7 @@ class SalespageManagementTest extends TestCase
 
         $response = $this->actingAs($user)->post(route('funnels.salespage.generate', $funnel), [
             'ai_provider_setting_id' => $setting->id,
+            'style' => 'bold',
             'brief' => 'Target audiens pecinta kopi',
         ]);
 
@@ -100,6 +126,7 @@ class SalespageManagementTest extends TestCase
 
         $salespage = Salespage::query()->where('funnel_id', $funnel->id)->firstOrFail();
         $this->assertTrue($salespage->generated_by_ai);
+        $this->assertSame(SalespageStyle::Bold, $salespage->style);
         $this->assertStringNotContainsString('<b>', $salespage->content[0]['data']['text']);
 
         $this->assertDatabaseHas('ai_generation_logs', [
@@ -123,6 +150,7 @@ class SalespageManagementTest extends TestCase
 
         $response = $this->actingAs($user)->post(route('funnels.salespage.generate', $funnel), [
             'ai_provider_setting_id' => $setting->id,
+            'style' => 'minimal',
         ]);
 
         $response->assertRedirect(route('funnels.salespage.edit', $funnel));
@@ -150,6 +178,7 @@ class SalespageManagementTest extends TestCase
 
         $this->actingAs($user)->post(route('funnels.salespage.generate', $funnel), [
             'ai_provider_setting_id' => $setting->id,
+            'style' => 'minimal',
         ]);
 
         $this->assertDatabaseMissing('salespages', ['funnel_id' => $funnel->id]);
@@ -176,6 +205,7 @@ class SalespageManagementTest extends TestCase
 
         $this->actingAs($user)->post(route('funnels.salespage.generate', $funnel), [
             'ai_provider_setting_id' => $setting->id,
+            'style' => 'minimal',
         ]);
 
         $this->assertDatabaseHas('ai_generation_logs', [
@@ -209,6 +239,7 @@ class SalespageManagementTest extends TestCase
 
         $response = $this->actingAs($user)->post(route('funnels.salespage.generate', $funnel), [
             'ai_provider_setting_id' => $setting->id,
+            'style' => 'minimal',
         ]);
 
         $response->assertSessionHasNoErrors();
@@ -255,6 +286,7 @@ class SalespageManagementTest extends TestCase
 
         $response = $this->actingAs($user)->post(route('funnels.salespage.generate', $funnel), [
             'ai_provider_setting_id' => $setting->id,
+            'style' => 'minimal',
         ]);
 
         $response->assertSessionHasNoErrors();
@@ -268,5 +300,19 @@ class SalespageManagementTest extends TestCase
             'ai_provider_setting_id' => $setting->id,
             'status' => 'success',
         ]);
+    }
+
+    public function test_generate_request_requires_a_valid_style(): void
+    {
+        $user = User::factory()->create();
+        $funnel = Funnel::factory()->for($user, 'creator')->create();
+        $setting = AiProviderSetting::factory()->for($user, 'creator')->create();
+
+        $response = $this->actingAs($user)->post(route('funnels.salespage.generate', $funnel), [
+            'ai_provider_setting_id' => $setting->id,
+            'style' => 'not-a-real-style',
+        ]);
+
+        $response->assertSessionHasErrors('style');
     }
 }

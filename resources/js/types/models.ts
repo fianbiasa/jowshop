@@ -116,11 +116,14 @@ export interface FunnelOffer {
     updated_at: string;
 }
 
+export type SalespageStyle = 'minimal' | 'bold' | 'editorial';
+
 export interface Salespage {
     id: number;
     funnel_id: number;
     title: string;
     content: Array<{ type: string; data: Record<string, unknown> }>;
+    style: SalespageStyle;
     seo_title: string | null;
     seo_description: string | null;
     og_image_path: string | null;

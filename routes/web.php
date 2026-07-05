@@ -15,6 +15,7 @@ use App\Http\Controllers\OrderShipmentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductDigitalAssetController;
 use App\Http\Controllers\PublicSalespageController;
+use App\Http\Controllers\ResumePaymentController;
 use App\Http\Controllers\SalespageController;
 use Illuminate\Support\Facades\Route;
 
@@ -53,6 +54,8 @@ Route::middleware('throttle:order-lookup')->group(function () {
     Route::get('pesanan-saya', [OrderLookupController::class, 'create'])->name('order-lookup.create');
     Route::post('pesanan-saya', [OrderLookupController::class, 'store'])->name('order-lookup.store');
     Route::get('pesanan-saya/{order:order_number}', [OrderLookupController::class, 'show'])->name('order-lookup.show');
+
+    Route::get('pesanan/{order:order_number}/bayar/{token}', [ResumePaymentController::class, 'show'])->name('order.resume-payment');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

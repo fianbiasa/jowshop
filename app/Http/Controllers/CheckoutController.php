@@ -19,10 +19,13 @@ use App\Models\FunnelOffer;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PaymentSetting;
+use App\Notifications\OrderConfirmed;
+use App\Notifications\PaymentInstructions;
 use App\Services\DuitkuGateway;
 use App\Services\FunnelTracker;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -113,6 +116,7 @@ class CheckoutController extends Controller
             'address_id' => $address?->id,
             'visitor_id' => $session->visitor_id,
             'order_number' => Order::generateOrderNumber(),
+            'payment_token' => Str::random(40),
             'subtotal' => $product->price,
             'total' => $product->price,
             'status' => OrderStatus::Pending,
@@ -124,6 +128,8 @@ class CheckoutController extends Controller
             'quantity' => 1,
             'unit_price' => $product->price,
         ]);
+
+        $customer->notify(new OrderConfirmed($order));
 
         $tracker->recordOnce($session, FunnelEventType::CheckoutSubmitted);
 
@@ -218,6 +224,9 @@ class CheckoutController extends Controller
 
             abort(503, 'Pembayaran sedang tidak tersedia, silakan coba lagi beberapa saat lagi.');
         }
+
+        $order->loadMissing('customer');
+        $order->customer->notify(new PaymentInstructions($order, (string) $transaction['paymentUrl']));
 
         return Inertia::location((string) $transaction['paymentUrl']);
     }

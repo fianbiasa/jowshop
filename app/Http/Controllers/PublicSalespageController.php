@@ -31,7 +31,7 @@ class PublicSalespageController extends Controller
         $tracker->recordOnce($session, FunnelEventType::SalespageView);
         $viewEvent = $session->events()->where('event_type', FunnelEventType::SalespageView)->first();
 
-        return Inertia::render('public/salespage', [
+        return Inertia::render('public/salespage-view', [
             'metaPixel' => $this->metaPixelProp($funnel->fbPixelId(), $viewEvent),
             'funnel' => [
                 'name' => $funnel->name,
@@ -40,6 +40,7 @@ class PublicSalespageController extends Controller
             'salespage' => [
                 'title' => $funnel->salespage->title,
                 'content' => $funnel->salespage->content,
+                'style' => $funnel->salespage->style,
                 'seo_title' => $funnel->salespage->seo_title,
                 'seo_description' => $funnel->salespage->seo_description,
             ],

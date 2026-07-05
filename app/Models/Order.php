@@ -20,11 +20,14 @@ use Illuminate\Support\Str;
  * @property int|null $address_id
  * @property int|null $visitor_id
  * @property string $order_number
+ * @property string|null $payment_token
  * @property string $subtotal
  * @property string $discount_total
  * @property string $shipping_cost
  * @property string $total
  * @property OrderStatus $status
+ * @property int $payment_reminder_count
+ * @property Carbon|null $last_payment_reminder_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
@@ -34,11 +37,14 @@ use Illuminate\Support\Str;
     'address_id',
     'visitor_id',
     'order_number',
+    'payment_token',
     'subtotal',
     'discount_total',
     'shipping_cost',
     'total',
     'status',
+    'payment_reminder_count',
+    'last_payment_reminder_at',
 ])]
 class Order extends Model
 {
@@ -58,6 +64,7 @@ class Order extends Model
             'discount_total' => 'decimal:2',
             'shipping_cost' => 'decimal:2',
             'total' => 'decimal:2',
+            'last_payment_reminder_at' => 'datetime',
         ];
     }
 
@@ -132,6 +139,19 @@ class Order extends Model
     public static function generateOrderNumber(): string
     {
         return 'ORD-'.strtoupper(Str::random(8));
+    }
+
+    /**
+     * A one-click link (used in order/payment emails) that lets the
+     * customer resume paying for this order without needing an active
+     * checkout session — see ResumePaymentController.
+     */
+    public function resumePaymentUrl(): string
+    {
+        return route('order.resume-payment', [
+            'order' => $this->order_number,
+            'token' => $this->payment_token,
+        ]);
     }
 
     /**

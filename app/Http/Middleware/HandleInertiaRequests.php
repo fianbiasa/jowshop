@@ -35,11 +35,20 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        // Public storefront/checkout routes aren't behind the `auth`
+        // middleware, but if an admin happens to be signed in on the same
+        // browser, $request->user() would still resolve to them — leaking
+        // their name/email/2FA status into a page anyone can view-source.
+        // Only expose the authenticated user on routes that actually
+        // require login.
+        $requiresAuth = $request->route()
+            && in_array('auth', $request->route()->gatherMiddleware(), true);
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $requiresAuth ? $request->user() : null,
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];

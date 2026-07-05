@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\FunnelStatus;
 use App\Models\Funnel;
 use App\Models\Salespage;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -44,7 +45,7 @@ class PublicSalespageTest extends TestCase
 
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page
-            ->component('public/salespage')
+            ->component('public/salespage-view')
             ->where('salespage.title', 'Kopi Robusta Terbaik')
         );
     }
@@ -54,5 +55,22 @@ class PublicSalespageTest extends TestCase
         $response = $this->get('/f/tidak-ada');
 
         $response->assertNotFound();
+    }
+
+    /**
+     * The public storefront isn't behind the `auth` middleware, but an admin
+     * browsing it in the same session shouldn't have their account (name,
+     * email, 2FA status) embedded in a page anyone can view-source.
+     */
+    public function test_logged_in_admins_account_is_not_exposed_on_the_public_page(): void
+    {
+        $admin = User::factory()->create(['email' => 'admin@jowshop.web.id']);
+        $funnel = Funnel::factory()->published()->create(['slug' => 'kopi-robusta']);
+        Salespage::factory()->published()->create(['funnel_id' => $funnel->id]);
+
+        $response = $this->actingAs($admin)->get('/f/kopi-robusta');
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page->where('auth.user', null));
     }
 }

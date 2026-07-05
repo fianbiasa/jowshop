@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\OrderStatus;
 use App\Http\Requests\LookupOrderRequest;
 use App\Models\Order;
 use Illuminate\Http\RedirectResponse;
@@ -60,6 +61,9 @@ class OrderLookupController extends Controller
                 'order_number' => $order->order_number,
                 'status' => $order->status,
                 'total' => $order->total,
+                'payment_resume_url' => $order->status === OrderStatus::Pending
+                    ? $order->resumePaymentUrl()
+                    : null,
                 'items' => $order->items->map(fn ($item) => [
                     'product_name' => $item->product->name,
                     'quantity' => $item->quantity,

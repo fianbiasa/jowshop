@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\SalespageStyle;
 use Database\Factories\SalespageFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,6 +15,7 @@ use Illuminate\Support\Carbon;
  * @property int $funnel_id
  * @property string $title
  * @property array<int, array<string, mixed>> $content
+ * @property SalespageStyle $style
  * @property string|null $seo_title
  * @property string|null $seo_description
  * @property string|null $og_image_path
@@ -26,6 +28,7 @@ use Illuminate\Support\Carbon;
     'funnel_id',
     'title',
     'content',
+    'style',
     'seo_title',
     'seo_description',
     'og_image_path',
@@ -46,6 +49,7 @@ class Salespage extends Model
     {
         return [
             'content' => 'array',
+            'style' => SalespageStyle::class,
             'generated_by_ai' => 'boolean',
             'published_at' => 'datetime',
         ];

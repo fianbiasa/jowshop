@@ -11,6 +11,8 @@ use App\Models\FunnelSession;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PaymentSetting;
+use App\Notifications\PaymentFailed;
+use App\Notifications\PaymentSuccessful;
 use App\Services\DigitalDeliveryService;
 use App\Services\DuitkuGateway;
 use Illuminate\Http\RedirectResponse;
@@ -59,10 +61,23 @@ class DuitkuWebhookController extends Controller
 
         $order = $payment->order;
 
+        // Incremental upsell/downsell payments reuse this same webhook (see
+        // CheckoutUpsellController) but shouldn't re-trigger the main
+        // order-level "payment successful/failed" emails below.
+        $isMainOrderPayment = $merchantOrderId === $order->order_number;
+
         if ($isPaid) {
             $order->update(['status' => OrderStatus::Paid]);
             $this->decrementPhysicalStock($order);
             $digitalDeliveries->generateForOrder($order);
+
+            if ($isMainOrderPayment && $order->totalPhysicalWeightGrams() > 0) {
+                $order->loadMissing('customer');
+                $order->customer->notify(new PaymentSuccessful($order));
+            }
+        } elseif ($isMainOrderPayment) {
+            $order->loadMissing('customer');
+            $order->customer->notify(new PaymentFailed($order));
         }
 
         $funnelSession = FunnelSession::query()->where('order_id', $order->id)->first();

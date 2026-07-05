@@ -24,4 +24,13 @@ class DashboardTest extends TestCase
         $response = $this->get(route('dashboard'));
         $response->assertOk();
     }
+
+    public function test_authenticated_users_auth_prop_is_shared_on_the_dashboard()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $response = $this->get(route('dashboard'));
+        $response->assertInertia(fn ($page) => $page->where('auth.user.id', $user->id));
+    }
 }

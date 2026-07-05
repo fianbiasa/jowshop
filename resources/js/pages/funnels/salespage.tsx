@@ -22,7 +22,13 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { index } from '@/routes/funnels';
 import { generate, update } from '@/routes/funnels/salespage';
-import type { AiProviderSetting, Funnel, Salespage } from '@/types/models';
+import type {
+    AiProviderSetting,
+    Funnel,
+    Salespage,
+    SalespageStyle,
+} from '@/types/models';
+import SalespageStylePicker from './salespage-style-picker';
 
 type BlockDataValue =
     string | string[] | Array<{ question: string; answer: string }>;
@@ -202,12 +208,14 @@ export default function SalespageEditor({
     const form = useForm<{
         title: string;
         content: Block[];
+        style: SalespageStyle;
         seo_title: string;
         seo_description: string;
         is_published: boolean;
     }>({
         title: salespage?.title ?? funnel.name,
         content: (salespage?.content as Block[]) ?? [],
+        style: salespage?.style ?? 'minimal',
         seo_title: salespage?.seo_title ?? '',
         seo_description: salespage?.seo_description ?? '',
         is_published: !!salespage?.published_at,
@@ -256,6 +264,7 @@ export default function SalespageEditor({
             generate(funnel.id).url,
             {
                 ai_provider_setting_id: aiProviderId,
+                style: form.data.style,
                 brief,
             },
             { preserveScroll: true },
@@ -338,6 +347,14 @@ export default function SalespageEditor({
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
+                </div>
+
+                <div className="space-y-3">
+                    <Label>Style Salespage</Label>
+                    <SalespageStylePicker
+                        value={form.data.style}
+                        onChange={(style) => form.setData('style', style)}
+                    />
                 </div>
 
                 <div className="space-y-4 rounded-lg border p-4">

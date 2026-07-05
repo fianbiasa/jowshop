@@ -34,6 +34,7 @@ export default function OrderLookupResult({
         order_number: string;
         status: OrderStatus;
         total: string;
+        payment_resume_url: string | null;
         items: Item[];
         shipment: {
             courier: string;
@@ -56,6 +57,19 @@ export default function OrderLookupResult({
                     </div>
                     <Badge className="capitalize">{order.status}</Badge>
                 </div>
+
+                {order.payment_resume_url && (
+                    <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+                        <p className="text-sm text-amber-800">
+                            Pesanan ini masih menunggu pembayaran.
+                        </p>
+                        <Button asChild className="mt-3 w-full">
+                            <a href={order.payment_resume_url}>
+                                Lanjutkan Pembayaran
+                            </a>
+                        </Button>
+                    </div>
+                )}
 
                 <div className="space-y-3">
                     {order.items.map((item, i) => (
