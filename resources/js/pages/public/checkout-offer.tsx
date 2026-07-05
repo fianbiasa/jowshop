@@ -53,7 +53,9 @@ export default function CheckoutOffer({
                             {offer.headline}
                         </h1>
                         {offer.description && (
-                            <p className={`mt-2 ${SUBHEADLINE_CLASS[style]}`}>
+                            <p
+                                className={`mt-2 whitespace-pre-line ${SUBHEADLINE_CLASS[style]}`}
+                            >
                                 {offer.description}
                             </p>
                         )}

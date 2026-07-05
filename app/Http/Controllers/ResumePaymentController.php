@@ -35,6 +35,7 @@ class ResumePaymentController extends Controller
         $order->loadMissing('funnel');
 
         $request->session()->put($this->orderSessionKey($order->funnel), $order->id);
+        $request->session()->put($this->returnOrderSessionKey($order->funnel), $order->id);
 
         return to_route('public.checkout.pay', $order->funnel);
     }

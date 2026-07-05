@@ -134,6 +134,7 @@ class CheckoutController extends Controller
         $tracker->recordOnce($session, FunnelEventType::CheckoutSubmitted);
 
         $request->session()->put($this->orderSessionKey($funnel), $order->id);
+        $request->session()->put($this->returnOrderSessionKey($funnel), $order->id);
 
         $rootBump = $funnel->rootOfferForStage(OfferStage::Bump);
 
@@ -245,7 +246,7 @@ class CheckoutController extends Controller
     {
         $this->ensurePublished($funnel);
 
-        $orderId = $request->session()->get($this->orderSessionKey($funnel));
+        $orderId = $request->session()->get($this->returnOrderSessionKey($funnel));
 
         if (! is_int($orderId)) {
             throw new NotFoundHttpException;

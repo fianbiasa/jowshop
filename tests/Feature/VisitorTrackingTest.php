@@ -29,6 +29,28 @@ class VisitorTrackingTest extends TestCase
         $this->assertNotNull($visitor->first_seen_at);
     }
 
+    /**
+     * Real Facebook ad click-throughs carry a long-format fbclid (with the
+     * "_aem_" suffix Meta added), which regularly pushes the full landing
+     * URL past 191 characters. Under strict SQL mode that used to throw a
+     * "Data too long for column" error on the very first insert for a new
+     * visitor — a 500 for every first-time ad click.
+     */
+    public function test_first_time_visitor_with_a_long_fbclid_landing_url_does_not_500(): void
+    {
+        $funnel = Funnel::factory()->published()->create(['slug' => 'betani']);
+        Salespage::factory()->published()->create(['funnel_id' => $funnel->id]);
+
+        $fbclid = 'IwY2xjawS3TEVleHRuA2FlbQIxMABicmlkETFGQTNBRHcwdWxqU0RId0FKc3J0YwZhcHBfaWQQMjIyMDM5MTc4ODIwMDg5MgABHuvsAH7E1xYJUf5-7gzoqji0GWqCxWEiYLr4-AKD2Hs5L68n7xmijpB2uZLr_aem_03GIUuRr7jzdkaDzEudxXg';
+
+        $response = $this->get("/f/betani?fbclid={$fbclid}");
+
+        $response->assertOk();
+
+        $visitor = Visitor::query()->firstOrFail();
+        $this->assertStringContainsString($fbclid, $visitor->landing_url);
+    }
+
     public function test_returning_visitor_with_same_cookie_is_recognized(): void
     {
         $funnel = Funnel::factory()->published()->create(['slug' => 'kopi']);

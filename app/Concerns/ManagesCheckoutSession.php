@@ -13,6 +13,20 @@ trait ManagesCheckoutSession
         return "checkout.{$funnel->id}.order_id";
     }
 
+    /**
+     * A separate, longer-lived pointer to "the order this session most
+     * recently checked out" — unlike orderSessionKey(), this is never
+     * forgotten once the checkout+post-purchase-offer flow completes, so
+     * CheckoutController::return() can still be refreshed/revisited after
+     * that point instead of 404ing (orderSessionKey() itself IS forgotten
+     * then, so a later fresh checkout on the same funnel doesn't wrongly
+     * resume into this already-completed order).
+     */
+    private function returnOrderSessionKey(Funnel $funnel): string
+    {
+        return "checkout.{$funnel->id}.return_order_id";
+    }
+
     private function offerSessionKey(Funnel $funnel): string
     {
         return "checkout.{$funnel->id}.current_offer_id";

@@ -227,6 +227,29 @@ class PostPurchaseOfferTest extends TestCase
         );
     }
 
+    public function test_return_page_can_be_refreshed_without_404ing(): void
+    {
+        PaymentSetting::factory()->create();
+        $this->fakeDuitkuPaymentMethods();
+        $this->fakeDuitkuInquiry();
+
+        $funnel = $this->publishedFunnel();
+        $order = $this->payAndConfirmMainOrder($funnel);
+
+        $first = $this->get("/f/{$funnel->slug}/checkout/kembali");
+        $first->assertOk();
+
+        // Refreshing (or the browser retrying) the same URL must keep
+        // working — it must not depend on session state that was only ever
+        // meant to be cleared once the whole checkout+offer flow is done.
+        $second = $this->get("/f/{$funnel->slug}/checkout/kembali");
+        $second->assertOk();
+        $second->assertInertia(fn ($page) => $page
+            ->component('public/checkout-return')
+            ->where('order.order_number', $order->order_number)
+        );
+    }
+
     public function test_return_page_redirects_to_root_upsell_when_order_is_paid(): void
     {
         PaymentSetting::factory()->create();
