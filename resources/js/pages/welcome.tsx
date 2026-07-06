@@ -2,6 +2,15 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import { BarChart3, CreditCard, GitBranch, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { dashboard, login, register } from '@/routes';
+import { create as orderLookupCreate } from '@/routes/order-lookup';
+import { create as shippingEstimateCreate } from '@/routes/shipping-estimate';
+import { create as trackingCreate } from '@/routes/tracking';
+
+const customerLinks = [
+    { label: 'Cek Pesanan', href: orderLookupCreate() },
+    { label: 'Cek Ongkir', href: shippingEstimateCreate() },
+    { label: 'Resi', href: trackingCreate() },
+];
 
 const features = [
     {
@@ -43,6 +52,20 @@ export default function Welcome() {
             </Head>
 
             <div className="flex min-h-screen flex-col bg-background text-foreground">
+                <div className="border-b bg-muted/30">
+                    <nav className="mx-auto flex w-full max-w-5xl items-center justify-end gap-4 px-6 py-2 text-sm text-muted-foreground">
+                        {customerLinks.map((link) => (
+                            <Link
+                                key={link.label}
+                                href={link.href}
+                                className="hover:text-foreground hover:underline"
+                            >
+                                {link.label}
+                            </Link>
+                        ))}
+                    </nav>
+                </div>
+
                 <header className="mx-auto flex w-full max-w-5xl items-center justify-between p-6">
                     <div className="flex items-center gap-2 font-semibold">
                         <img

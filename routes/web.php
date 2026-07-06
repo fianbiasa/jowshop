@@ -15,8 +15,10 @@ use App\Http\Controllers\OrderShipmentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductDigitalAssetController;
 use App\Http\Controllers\PublicSalespageController;
+use App\Http\Controllers\PublicTrackingController;
 use App\Http\Controllers\ResumePaymentController;
 use App\Http\Controllers\SalespageController;
+use App\Http\Controllers\ShippingEstimateController;
 use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
@@ -59,6 +61,15 @@ Route::middleware('throttle:order-lookup')->group(function () {
     Route::get('pesanan-saya/{order:order_number}', [OrderLookupController::class, 'show'])->name('order-lookup.show');
 
     Route::get('pesanan/{order:order_number}/bayar/{token}', [ResumePaymentController::class, 'show'])->name('order.resume-payment');
+
+    Route::get('cek-resi', [PublicTrackingController::class, 'create'])->name('tracking.create');
+    Route::post('cek-resi', [PublicTrackingController::class, 'store'])->name('tracking.store');
+});
+
+Route::middleware('throttle:public-funnel')->group(function () {
+    Route::get('cek-ongkir', [ShippingEstimateController::class, 'create'])->name('shipping-estimate.create');
+    Route::get('cek-ongkir/destinations', [ShippingEstimateController::class, 'searchDestinations'])->name('shipping-estimate.destinations');
+    Route::post('cek-ongkir', [ShippingEstimateController::class, 'store'])->name('shipping-estimate.store');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

@@ -6,6 +6,7 @@ use App\Enums\ShippingProvider;
 use App\Exceptions\ShippingRateException;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
 use App\Models\Shipment;
 use App\Models\ShippingSetting;
 use Illuminate\Http\Client\ConnectionException;
@@ -38,10 +39,36 @@ class ShippingRateClient
      */
     public function calculateRates(ShippingSetting $settings, Order $order, string $destinationAreaId): array
     {
-        return match ($settings->provider) {
-            ShippingProvider::Komerce, ShippingProvider::RajaOngkir => $this->calculateRatesWithKomerce($settings, $order, $destinationAreaId),
-            ShippingProvider::Biteship => $this->calculateRatesWithBiteship($settings, $order, $destinationAreaId),
-        };
+        return $this->calculateRatesForShipment(
+            $settings,
+            max(1, $order->totalPhysicalWeightGrams()),
+            $this->buildBiteshipItems($order),
+            $destinationAreaId,
+        );
+    }
+
+    /**
+     * Estimate shipping cost for a single product outside of a real order —
+     * used by the public "Cek Ongkir" tool where there's no checkout in
+     * progress yet, just "what would this cost".
+     *
+     * @return array<int, array{courier: string, service: string, description: string, cost: int, etd: string}>
+     *
+     * @throws ShippingRateException
+     */
+    public function calculateRatesForProduct(ShippingSetting $settings, Product $product, string $destinationAreaId): array
+    {
+        $weightGrams = max(1, (int) $product->weight_grams);
+
+        return $this->calculateRatesForShipment($settings, $weightGrams, [[
+            'name' => $product->name,
+            'value' => (int) round((float) $product->price),
+            'weight' => $weightGrams,
+            'length' => (int) ($product->length_cm ?? 10),
+            'width' => (int) ($product->width_cm ?? 10),
+            'height' => (int) ($product->height_cm ?? 10),
+            'quantity' => 1,
+        ]], $destinationAreaId);
     }
 
     /**
@@ -118,7 +145,20 @@ class ShippingRateClient
      *
      * @throws ShippingRateException
      */
-    private function calculateRatesWithKomerce(ShippingSetting $settings, Order $order, string $destinationAreaId): array
+    private function calculateRatesForShipment(ShippingSetting $settings, int $weightGrams, array $items, string $destinationAreaId): array
+    {
+        return match ($settings->provider) {
+            ShippingProvider::Komerce, ShippingProvider::RajaOngkir => $this->calculateRatesWithKomerce($settings, $weightGrams, $destinationAreaId),
+            ShippingProvider::Biteship => $this->calculateRatesWithBiteship($settings, $items, $destinationAreaId),
+        };
+    }
+
+    /**
+     * @return array<int, array{courier: string, service: string, description: string, cost: int, etd: string}>
+     *
+     * @throws ShippingRateException
+     */
+    private function calculateRatesWithKomerce(ShippingSetting $settings, int $weightGrams, string $destinationAreaId): array
     {
         $couriers = $settings->enabled_couriers ?? ['jne', 'jnt', 'sicepat'];
 
@@ -128,7 +168,7 @@ class ShippingRateClient
                 ->post("{$settings->baseApiUrl()}/calculate/domestic-cost", [
                     'origin' => $settings->origin_area_id,
                     'destination' => $destinationAreaId,
-                    'weight' => max(1, $order->totalPhysicalWeightGrams()),
+                    'weight' => $weightGrams,
                     'courier' => implode(':', $couriers),
                     'price' => 'lowest',
                 ]);
@@ -201,10 +241,9 @@ class ShippingRateClient
      *
      * @throws ShippingRateException
      */
-    private function calculateRatesWithBiteship(ShippingSetting $settings, Order $order, string $destinationAreaId): array
+    private function calculateRatesWithBiteship(ShippingSetting $settings, array $items, string $destinationAreaId): array
     {
         $couriers = $settings->enabled_couriers ?? ['jne', 'jnt', 'sicepat'];
-        $items = $this->buildBiteshipItems($order);
 
         try {
             $response = Http::withHeaders(['Authorization' => $settings->api_key])
