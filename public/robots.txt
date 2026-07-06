@@ -1,2 +1,8 @@
 User-agent: *
-Disallow:
+Disallow: /f/*/checkout*
+Disallow: /f/*/upsell/*
+Disallow: /pesanan-saya
+Disallow: /pesanan/*
+Disallow: /unduh/*
+
+Sitemap: https://jowshop.web.id/sitemap.xml

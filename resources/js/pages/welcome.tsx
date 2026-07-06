@@ -35,7 +35,12 @@ export default function Welcome() {
 
     return (
         <>
-            <Head title="Jowshop — Platform Sales Funnel" />
+            <Head title="Jowshop — Platform Sales Funnel">
+                <meta
+                    name="description"
+                    content="Jowshop membantu kamu menyusun salespage, checkout, order bump, upsell, dan downsell dalam satu funnel penjualan — lengkap dengan dashboard analitik dan pembayaran terintegrasi."
+                />
+            </Head>
 
             <div className="flex min-h-screen flex-col bg-background text-foreground">
                 <header className="mx-auto flex w-full max-w-5xl items-center justify-between p-6">

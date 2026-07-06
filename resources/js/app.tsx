@@ -1,10 +1,15 @@
 import { createInertiaApp } from '@inertiajs/react';
+import { lazy, Suspense } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { initializeTheme } from '@/hooks/use-appearance';
-import AppLayout from '@/layouts/app-layout';
-import AuthLayout from '@/layouts/auth-layout';
-import SettingsLayout from '@/layouts/settings/layout';
+
+// Lazy-loaded so the admin sidebar/nav (and everything it pulls in) isn't
+// bundled into the shared entry chunk every visitor downloads — public
+// pages (the salespage, checkout, etc.) never render these at all, but a
+// static import would still ship their code to every mobile ad visitor.
+const AppLayout = lazy(() => import('@/layouts/app-layout'));
+const AuthLayout = lazy(() => import('@/layouts/auth-layout'));
+const SettingsLayout = lazy(() => import('@/layouts/settings/layout'));
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -28,7 +33,7 @@ createInertiaApp({
     withApp(app) {
         return (
             <TooltipProvider delayDuration={0}>
-                {app}
+                <Suspense fallback={null}>{app}</Suspense>
                 <Toaster />
             </TooltipProvider>
         );
@@ -37,6 +42,3 @@ createInertiaApp({
         color: '#4B5563',
     },
 });
-
-// This will set light / dark mode on load...
-initializeTheme();

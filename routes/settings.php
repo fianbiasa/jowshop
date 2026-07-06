@@ -27,8 +27,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('throttle:6,1')
         ->name('user-password.update');
 
-    Route::inertia('settings/appearance', 'settings/appearance')->name('appearance.edit');
-
     Route::get('settings/ai-providers', [AiProviderSettingController::class, 'index'])->name('ai-providers.index');
     Route::post('settings/ai-providers', [AiProviderSettingController::class, 'store'])->name('ai-providers.store');
     Route::delete('settings/ai-providers/{aiProviderSetting}', [AiProviderSettingController::class, 'destroy'])->name('ai-providers.destroy');

@@ -8,11 +8,18 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+/**
+ * The appearance (light/dark) feature was removed entirely — the whole app
+ * is light-only now. These tests pin that: no page ever renders the dark
+ * class, and every page declares a light-only color-scheme so browsers'
+ * own "force dark" features (Android Chrome in particular) don't invert
+ * the page either.
+ */
 class HandleAppearanceTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_public_salespage_ignores_the_dark_appearance_cookie(): void
+    public function test_public_salespage_always_renders_light(): void
     {
         $funnel = Funnel::factory()->published()->create(['slug' => 'kopi-robusta']);
         Salespage::factory()->published()->create(['funnel_id' => $funnel->id]);
@@ -21,17 +28,19 @@ class HandleAppearanceTest extends TestCase
 
         $response->assertOk();
         $response->assertDontSee('class="dark"', false);
+        $response->assertSee('name="color-scheme" content="light"', false);
     }
 
-    public function test_order_lookup_form_ignores_the_dark_appearance_cookie(): void
+    public function test_order_lookup_form_always_renders_light(): void
     {
         $response = $this->withUnencryptedCookie('appearance', 'dark')->get(route('order-lookup.create'));
 
         $response->assertOk();
         $response->assertDontSee('class="dark"', false);
+        $response->assertSee('name="color-scheme" content="light"', false);
     }
 
-    public function test_admin_dashboard_still_respects_the_dark_appearance_cookie(): void
+    public function test_admin_dashboard_always_renders_light(): void
     {
         $user = User::factory()->create();
 
@@ -40,6 +49,7 @@ class HandleAppearanceTest extends TestCase
             ->get(route('dashboard'));
 
         $response->assertOk();
-        $response->assertSee('class="dark"', false);
+        $response->assertDontSee('class="dark"', false);
+        $response->assertSee('name="color-scheme" content="light"', false);
     }
 }

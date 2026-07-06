@@ -6,7 +6,6 @@ import { Separator } from '@/components/ui/separator';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn, toUrl } from '@/lib/utils';
 import { index as aiProvidersIndex } from '@/routes/ai-providers';
-import { edit as editAppearance } from '@/routes/appearance';
 import { edit as editMetaCapiSettings } from '@/routes/meta-capi-settings';
 import { edit as editPaymentSettings } from '@/routes/payment-settings';
 import { edit } from '@/routes/profile';
@@ -23,11 +22,6 @@ const sidebarNavItems: NavItem[] = [
     {
         title: 'Security',
         href: editSecurity(),
-        icon: null,
-    },
-    {
-        title: 'Appearance',
-        href: editAppearance(),
         icon: null,
     },
     {

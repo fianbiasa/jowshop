@@ -17,9 +17,12 @@ use App\Http\Controllers\ProductDigitalAssetController;
 use App\Http\Controllers\PublicSalespageController;
 use App\Http\Controllers\ResumePaymentController;
 use App\Http\Controllers\SalespageController;
+use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
+
+Route::get('sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 Route::prefix('f/{funnel:slug}')->name('public.')->middleware('throttle:public-funnel')->group(function () {
     Route::get('/', [PublicSalespageController::class, 'show'])->name('salespage.show');
