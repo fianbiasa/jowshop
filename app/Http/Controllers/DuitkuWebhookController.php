@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\BookBiteshipShipment;
 use App\Enums\FunnelEventType;
 use App\Enums\FunnelSessionStatus;
 use App\Enums\OrderStatus;
@@ -25,7 +26,7 @@ class DuitkuWebhookController extends Controller
     /**
      * Handle Duitku's server-to-server payment callback.
      */
-    public function handle(Request $request, DuitkuGateway $gateway, DigitalDeliveryService $digitalDeliveries): Response|RedirectResponse
+    public function handle(Request $request, DuitkuGateway $gateway, DigitalDeliveryService $digitalDeliveries, BookBiteshipShipment $bookBiteshipShipment): Response|RedirectResponse
     {
         $payload = $request->all();
 
@@ -72,6 +73,8 @@ class DuitkuWebhookController extends Controller
             $digitalDeliveries->generateForOrder($order);
 
             if ($isMainOrderPayment && $order->totalPhysicalWeightGrams() > 0) {
+                $bookBiteshipShipment($order);
+
                 $order->loadMissing('customer');
                 $order->customer->notify(new PaymentSuccessful($order));
             }

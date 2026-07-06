@@ -23,8 +23,13 @@ class ShippingSettingController extends Controller
                 'provider' => $setting->provider,
                 'origin_area_id' => $setting->origin_area_id,
                 'origin_label' => $setting->origin_label,
+                'origin_contact_name' => $setting->origin_contact_name,
+                'origin_contact_phone' => $setting->origin_contact_phone,
+                'origin_address' => $setting->origin_address,
+                'origin_postal_code' => $setting->origin_postal_code,
                 'enabled_couriers' => implode(',', $setting->enabled_couriers ?? []),
                 'is_active' => $setting->is_active,
+                'auto_book_shipping' => $setting->auto_book_shipping,
                 'is_configured' => true,
             ] : null,
         ]);
@@ -47,8 +52,13 @@ class ShippingSettingController extends Controller
             'api_key' => $validated['api_key'],
             'origin_area_id' => $validated['origin_area_id'],
             'origin_label' => $validated['origin_label'] ?? null,
+            'origin_contact_name' => $validated['origin_contact_name'] ?? null,
+            'origin_contact_phone' => $validated['origin_contact_phone'] ?? null,
+            'origin_address' => $validated['origin_address'] ?? null,
+            'origin_postal_code' => $validated['origin_postal_code'] ?? null,
             'enabled_couriers' => $couriers === [] ? null : $couriers,
             'is_active' => $validated['is_active'] ?? false,
+            'auto_book_shipping' => $validated['auto_book_shipping'] ?? false,
         ];
 
         $setting = ShippingSetting::query()->first();

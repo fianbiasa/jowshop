@@ -6,4 +6,5 @@ enum ShippingProvider: string
 {
     case Komerce = 'komerce';
     case RajaOngkir = 'rajaongkir';
+    case Biteship = 'biteship';
 }

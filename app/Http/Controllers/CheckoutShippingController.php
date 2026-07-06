@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Concerns\ManagesCheckoutSession;
 use App\Enums\FunnelStatus;
+use App\Enums\ShippingProvider;
 use App\Exceptions\ShippingRateException;
 use App\Models\Funnel;
 use App\Models\Order;
 use App\Models\Shipment;
+use App\Models\ShippingArea;
 use App\Models\ShippingSetting;
 use App\Services\ShippingRateClient;
 use Illuminate\Http\JsonResponse;
@@ -23,8 +25,13 @@ class CheckoutShippingController extends Controller
     use ManagesCheckoutSession;
 
     /**
-     * Search the shipping provider's destination area database, used by the
-     * checkout form to help the customer pick their delivery area.
+     * Search the destination area used by the checkout form to help the
+     * customer pick their delivery area. For Komerce/RajaOngkir, searches
+     * the local area mirror first (no API call, no quota used) and only
+     * falls back to the live provider search while local coverage is
+     * incomplete (e.g. mid-import). The local mirror holds RajaOngkir-shaped
+     * ids only, so it's skipped entirely for Biteship — those ids wouldn't
+     * mean anything to Biteship's rate calculation anyway.
      */
     public function search(Request $request, Funnel $funnel, ShippingRateClient $client): JsonResponse
     {
@@ -35,6 +42,20 @@ class CheckoutShippingController extends Controller
         }
 
         $settings = ShippingSetting::query()->where('is_active', true)->first();
+
+        if ($settings === null || $settings->provider !== ShippingProvider::Biteship) {
+            $local = ShippingArea::query()
+                ->where('label', 'like', "%{$query}%")
+                ->limit(10)
+                ->get(['id', 'label']);
+
+            if ($local->isNotEmpty()) {
+                return response()->json(['data' => $local->map(fn (ShippingArea $area): array => [
+                    'id' => (string) $area->id,
+                    'label' => $area->label,
+                ])]);
+            }
+        }
 
         if ($settings === null) {
             return response()->json(['data' => []]);
@@ -67,7 +88,7 @@ class CheckoutShippingController extends Controller
         abort_if($address === null || $address->destination_area_id === null, 422, 'Alamat tujuan tidak lengkap.');
 
         try {
-            $rates = $client->calculateRates($settings, $address->destination_area_id, $order->totalPhysicalWeightGrams());
+            $rates = $client->calculateRates($settings, $order, $address->destination_area_id);
         } catch (ShippingRateException) {
             $rates = [];
         }
@@ -102,7 +123,7 @@ class CheckoutShippingController extends Controller
         abort_if($address === null || $address->destination_area_id === null, 422, 'Alamat tujuan tidak lengkap.');
 
         try {
-            $rates = $client->calculateRates($settings, $address->destination_area_id, $order->totalPhysicalWeightGrams());
+            $rates = $client->calculateRates($settings, $order, $address->destination_area_id);
         } catch (ShippingRateException $exception) {
             report($exception);
 

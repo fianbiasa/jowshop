@@ -27,14 +27,19 @@ export interface MetaCapiSettingSummary {
     is_configured: true;
 }
 
-export type ShippingProvider = 'komerce' | 'rajaongkir';
+export type ShippingProvider = 'komerce' | 'rajaongkir' | 'biteship';
 
 export interface ShippingSettingSummary {
     provider: ShippingProvider;
     origin_area_id: string;
     origin_label: string | null;
+    origin_contact_name: string | null;
+    origin_contact_phone: string | null;
+    origin_address: string | null;
+    origin_postal_code: string | null;
     enabled_couriers: string;
     is_active: boolean;
+    auto_book_shipping: boolean;
     is_configured: true;
 }
 

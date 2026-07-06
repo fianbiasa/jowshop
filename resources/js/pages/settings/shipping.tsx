@@ -4,6 +4,7 @@ import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -13,6 +14,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { edit } from '@/routes/shipping-settings';
 import type { ShippingSettingSummary } from '@/types/models';
 
@@ -80,6 +82,9 @@ export default function ShippingSettings({
                                         </SelectItem>
                                         <SelectItem value="rajaongkir">
                                             RajaOngkir
+                                        </SelectItem>
+                                        <SelectItem value="biteship">
+                                            Biteship
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
@@ -152,6 +157,112 @@ export default function ShippingSettings({
                                     menampilkan semua kurir yang didukung
                                     provider.
                                 </p>
+                            </div>
+
+                            <div className="space-y-4 rounded-lg border p-4">
+                                <div>
+                                    <p className="text-sm font-medium">
+                                        Kontak & Alamat Asal (Biteship)
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Dipakai untuk booking pengiriman
+                                        otomatis ke Biteship saat pesanan
+                                        dibayar. Wajib diisi kalau "Booking
+                                        Otomatis" di bawah diaktifkan.
+                                    </p>
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="origin_contact_name">
+                                        Nama Kontak
+                                    </Label>
+                                    <Input
+                                        id="origin_contact_name"
+                                        name="origin_contact_name"
+                                        defaultValue={
+                                            shippingSetting?.origin_contact_name ??
+                                            ''
+                                        }
+                                        placeholder="Budi Santoso"
+                                    />
+                                    <InputError
+                                        message={errors.origin_contact_name}
+                                    />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="origin_contact_phone">
+                                        Nomor HP
+                                    </Label>
+                                    <Input
+                                        id="origin_contact_phone"
+                                        name="origin_contact_phone"
+                                        defaultValue={
+                                            shippingSetting?.origin_contact_phone ??
+                                            ''
+                                        }
+                                        placeholder="081234567890"
+                                    />
+                                    <InputError
+                                        message={errors.origin_contact_phone}
+                                    />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="origin_address">
+                                        Alamat Lengkap
+                                    </Label>
+                                    <Textarea
+                                        id="origin_address"
+                                        name="origin_address"
+                                        defaultValue={
+                                            shippingSetting?.origin_address ??
+                                            ''
+                                        }
+                                        placeholder="Jl. Contoh No. 1, RT/RW..."
+                                    />
+                                    <InputError
+                                        message={errors.origin_address}
+                                    />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="origin_postal_code">
+                                        Kode Pos
+                                    </Label>
+                                    <Input
+                                        id="origin_postal_code"
+                                        name="origin_postal_code"
+                                        defaultValue={
+                                            shippingSetting?.origin_postal_code ??
+                                            ''
+                                        }
+                                        placeholder="28125"
+                                    />
+                                    <InputError
+                                        message={errors.origin_postal_code}
+                                    />
+                                </div>
+
+                                <div className="flex items-center space-x-3">
+                                    <Checkbox
+                                        id="auto_book_shipping"
+                                        name="auto_book_shipping"
+                                        value="1"
+                                        defaultChecked={
+                                            shippingSetting?.auto_book_shipping ??
+                                            false
+                                        }
+                                    />
+                                    <Label htmlFor="auto_book_shipping">
+                                        Booking Otomatis (buat pesanan
+                                        pengiriman nyata ke Biteship saat
+                                        pesanan dibayar)
+                                    </Label>
+                                </div>
+                                <InputError
+                                    message={errors.auto_book_shipping}
+                                />
                             </div>
 
                             <input type="hidden" name="is_active" value="1" />
