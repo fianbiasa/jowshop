@@ -78,6 +78,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('orders', OrderController::class)->only(['index', 'show']);
     Route::put('orders/{order}/shipment', [OrderShipmentController::class, 'update'])->name('orders.shipment.update');
+    Route::post('orders/{order}/shipment/track', [OrderShipmentController::class, 'track'])->name('orders.shipment.track');
 });
 
 require __DIR__.'/settings.php';

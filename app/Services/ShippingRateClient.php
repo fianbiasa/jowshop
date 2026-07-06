@@ -61,6 +61,22 @@ class ShippingRateClient
     }
 
     /**
+     * Look up the live delivery status of a manually-entered (or
+     * auto-booked) tracking number against the courier's own system.
+     *
+     * @return array{status: string, history: array<int, array{status: string, note: string, updated_at: string}>}
+     *
+     * @throws ShippingRateException
+     */
+    public function trackShipment(ShippingSetting $settings, string $courier, string $trackingNumber): array
+    {
+        return match ($settings->provider) {
+            ShippingProvider::Biteship => $this->trackShipmentWithBiteship($settings, $courier, $trackingNumber),
+            ShippingProvider::Komerce, ShippingProvider::RajaOngkir => throw new \RuntimeException('Tracking lookup is not supported for this provider yet.'),
+        };
+    }
+
+    /**
      * @return array<int, array{id: string, label: string}>
      *
      * @throws ShippingRateException
@@ -273,6 +289,44 @@ class ShippingRateClient
             'waybill_id' => (string) $response->json('courier.waybill_id', ''),
             'tracking_id' => (string) $response->json('courier.tracking_id', ''),
             'status' => (string) $response->json('status', ''),
+        ];
+    }
+
+    /**
+     * @return array{status: string, history: array<int, array{status: string, note: string, updated_at: string}>}
+     *
+     * @throws ShippingRateException
+     */
+    private function trackShipmentWithBiteship(ShippingSetting $settings, string $courier, string $trackingNumber): array
+    {
+        try {
+            $response = Http::withHeaders(['Authorization' => $settings->api_key])
+                ->timeout(15)
+                ->get("https://api.biteship.com/v1/trackings/{$trackingNumber}/couriers/{$courier}");
+        } catch (ConnectionException $exception) {
+            throw ShippingRateException::fromConnectionFailure($exception);
+        }
+
+        if ($response->failed()) {
+            throw ShippingRateException::fromResponse($response->status(), $response->body());
+        }
+
+        $history = $response->json('history', []);
+
+        if (! is_array($history)) {
+            $history = [];
+        }
+
+        return [
+            'status' => (string) $response->json('status', ''),
+            'history' => array_values(array_map(
+                fn (array $row): array => [
+                    'status' => (string) ($row['status'] ?? ''),
+                    'note' => (string) ($row['note'] ?? ''),
+                    'updated_at' => (string) ($row['updated_at'] ?? ''),
+                ],
+                $history,
+            )),
         ];
     }
 

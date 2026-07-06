@@ -1,4 +1,4 @@
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, usePage } from '@inertiajs/react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
@@ -21,8 +21,16 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { index } from '@/routes/orders';
-import { update as updateShipment } from '@/routes/orders/shipment';
+import {
+    track as trackShipment,
+    update as updateShipment,
+} from '@/routes/orders/shipment';
 import type { Order } from '@/types/models';
+
+type ShipmentTracking = {
+    status: string;
+    history: { status: string; note: string; updated_at: string }[];
+};
 
 const priceFormatter = new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -35,6 +43,11 @@ function formatPrice(price: string) {
 }
 
 export default function Show({ order }: { order: Order }) {
+    const { flash } = usePage<{
+        flash?: { shipment_tracking?: ShipmentTracking };
+    }>().props;
+    const tracking = flash?.shipment_tracking;
+
     return (
         <>
             <Head title={`Pesanan ${order.order_number}`} />
@@ -217,6 +230,39 @@ export default function Show({ order }: { order: Order }) {
                                 </>
                             )}
                         </Form>
+
+                        <Form {...trackShipment.form(order.id)}>
+                            {({ processing }) => (
+                                <Button
+                                    type="submit"
+                                    variant="outline"
+                                    disabled={processing}
+                                >
+                                    Cek Tracking
+                                </Button>
+                            )}
+                        </Form>
+
+                        {tracking && (
+                            <div className="space-y-2 rounded-lg border bg-muted/30 p-4 text-sm">
+                                <p className="font-medium capitalize">
+                                    Status: {tracking.status}
+                                </p>
+                                <ul className="space-y-1">
+                                    {tracking.history.map((entry) => (
+                                        <li
+                                            key={`${entry.status}-${entry.updated_at}`}
+                                            className="text-muted-foreground"
+                                        >
+                                            <span className="font-medium text-foreground capitalize">
+                                                {entry.status}
+                                            </span>{' '}
+                                            — {entry.note} ({entry.updated_at})
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
                     </section>
                 )}
             </div>

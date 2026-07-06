@@ -4,11 +4,14 @@ namespace Tests\Feature;
 
 use App\Enums\OrderStatus;
 use App\Enums\ShipmentStatus;
+use App\Enums\ShippingProvider;
 use App\Models\Order;
 use App\Models\Shipment;
+use App\Models\ShippingSetting;
 use App\Models\User;
 use App\Notifications\ShipmentTrackingAvailable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
@@ -112,5 +115,76 @@ class OrderManagementTest extends TestCase
         ]);
 
         Notification::assertNotSentTo($order->customer, ShipmentTrackingAvailable::class);
+    }
+
+    public function test_tracking_a_shipment_flashes_the_courier_status_and_history(): void
+    {
+        $user = User::factory()->create();
+        ShippingSetting::factory()->create(['provider' => ShippingProvider::Biteship]);
+        $order = Order::factory()->create();
+        Shipment::factory()->for($order)->create(['courier' => 'jne', 'tracking_number' => '020170030469926']);
+
+        Http::fake(['*/trackings/*' => Http::response([
+            'success' => true,
+            'status' => 'delivered',
+            'history' => [
+                ['status' => 'confirmed', 'note' => 'Order confirmed', 'updated_at' => '2026-07-01T10:00:00+07:00'],
+                ['status' => 'delivered', 'note' => 'Package delivered', 'updated_at' => '2026-07-03T14:00:00+07:00'],
+            ],
+        ], 200)]);
+
+        $response = $this->actingAs($user)->post(route('orders.shipment.track', $order));
+
+        $response->assertRedirect(route('orders.show', $order));
+        $response->assertSessionHas('inertia.flash_data', fn (array $flash) => $flash['shipment_tracking']['status'] === 'delivered'
+            && count($flash['shipment_tracking']['history']) === 2);
+    }
+
+    public function test_tracking_without_a_tracking_number_shows_an_error_without_calling_the_provider(): void
+    {
+        $user = User::factory()->create();
+        ShippingSetting::factory()->create(['provider' => ShippingProvider::Biteship]);
+        $order = Order::factory()->create();
+        Shipment::factory()->for($order)->create(['courier' => 'jne', 'tracking_number' => null]);
+
+        Http::fake();
+
+        $response = $this->actingAs($user)->post(route('orders.shipment.track', $order));
+
+        $response->assertRedirect(route('orders.show', $order));
+        $response->assertSessionHas('inertia.flash_data', fn (array $flash) => $flash['toast']['type'] === 'error');
+        Http::assertNothingSent();
+    }
+
+    public function test_tracking_is_not_supported_when_provider_is_not_biteship(): void
+    {
+        $user = User::factory()->create();
+        // Default factory provider is Komerce.
+        ShippingSetting::factory()->create();
+        $order = Order::factory()->create();
+        Shipment::factory()->for($order)->create(['courier' => 'jne', 'tracking_number' => '020170030469926']);
+
+        Http::fake();
+
+        $response = $this->actingAs($user)->post(route('orders.shipment.track', $order));
+
+        $response->assertRedirect(route('orders.show', $order));
+        $response->assertSessionHas('inertia.flash_data', fn (array $flash) => $flash['toast']['type'] === 'error');
+        Http::assertNothingSent();
+    }
+
+    public function test_tracking_failure_from_the_provider_shows_an_error_toast(): void
+    {
+        $user = User::factory()->create();
+        ShippingSetting::factory()->create(['provider' => ShippingProvider::Biteship]);
+        $order = Order::factory()->create();
+        Shipment::factory()->for($order)->create(['courier' => 'jne', 'tracking_number' => '020170030469926']);
+
+        Http::fake(['*/trackings/*' => Http::response(['success' => false, 'error' => 'Data is not found'], 400)]);
+
+        $response = $this->actingAs($user)->post(route('orders.shipment.track', $order));
+
+        $response->assertRedirect(route('orders.show', $order));
+        $response->assertSessionHas('inertia.flash_data', fn (array $flash) => $flash['toast']['type'] === 'error');
     }
 }
