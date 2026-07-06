@@ -3,12 +3,14 @@ import { useState } from 'react';
 import InputError from '@/components/input-error';
 import { store } from '@/routes/public/checkout/pay';
 
+const priceFormatter = new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    maximumFractionDigits: 0,
+});
+
 function formatPrice(price: number) {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        maximumFractionDigits: 0,
-    }).format(price);
+    return priceFormatter.format(price);
 }
 
 type PaymentMethod = {

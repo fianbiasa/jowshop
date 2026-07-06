@@ -1,6 +1,6 @@
 import { Form, Head, setLayoutProps } from '@inertiajs/react';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,11 +16,11 @@ export default function TwoFactorChallenge() {
     const [showRecoveryInput, setShowRecoveryInput] = useState<boolean>(false);
     const [code, setCode] = useState<string>('');
 
-    const authConfigContent = useMemo<{
+    const authConfigContent: {
         title: string;
         description: string;
         toggleText: string;
-    }>(() => {
+    } = (() => {
         if (showRecoveryInput) {
             return {
                 title: 'Recovery code',
@@ -36,7 +36,7 @@ export default function TwoFactorChallenge() {
                 'Enter the authentication code provided by your authenticator application.',
             toggleText: 'login using a recovery code',
         };
-    }, [showRecoveryInput]);
+    })();
 
     setLayoutProps({
         title: authConfigContent.title,

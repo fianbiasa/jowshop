@@ -12,6 +12,7 @@ type OrderStatus =
     | 'expired';
 
 type Item = {
+    id: number;
     product_name: string;
     quantity: number;
     unit_price: string;
@@ -19,12 +20,14 @@ type Item = {
     download_token: string | null;
 };
 
+const priceFormatter = new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    maximumFractionDigits: 0,
+});
+
 function formatPrice(price: string) {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        maximumFractionDigits: 0,
-    }).format(Number(price));
+    return priceFormatter.format(Number(price));
 }
 
 export default function OrderLookupResult({
@@ -72,9 +75,9 @@ export default function OrderLookupResult({
                 )}
 
                 <div className="space-y-3">
-                    {order.items.map((item, i) => (
+                    {order.items.map((item) => (
                         <div
-                            key={i}
+                            key={item.id}
                             className="flex items-center justify-between rounded-lg border p-4"
                         >
                             <div>

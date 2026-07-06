@@ -390,6 +390,15 @@ export default function SalespageEditor({
     );
     const [brief, setBrief] = useState('');
 
+    // Content blocks have no natural id (just {type, data}), but the list
+    // below supports reordering — a plain index key would let React mix up
+    // which DOM node/local state belongs to which block after a move. This
+    // parallel array of generated ids is purely a client-side rendering aid
+    // and is never sent to the backend.
+    const [blockKeys, setBlockKeys] = useState<string[]>(() =>
+        form.data.content.map(() => crypto.randomUUID()),
+    );
+
     function updateBlock(index: number, data: BlockData) {
         const next = [...form.data.content];
         next[index] = { ...next[index], data };
@@ -401,6 +410,7 @@ export default function SalespageEditor({
             'content',
             form.data.content.filter((_, i) => i !== index),
         );
+        setBlockKeys((keys) => keys.filter((_, i) => i !== index));
     }
 
     function moveBlock(index: number, direction: -1 | 1) {
@@ -413,6 +423,16 @@ export default function SalespageEditor({
 
         [next[index], next[target]] = [next[target], next[index]];
         form.setData('content', next);
+
+        setBlockKeys((keys) => {
+            const nextKeys = [...keys];
+            [nextKeys[index], nextKeys[target]] = [
+                nextKeys[target],
+                nextKeys[index],
+            ];
+
+            return nextKeys;
+        });
     }
 
     function addBlock() {
@@ -420,6 +440,7 @@ export default function SalespageEditor({
             ...form.data.content,
             { type: newBlockType, data: defaultDataForType(newBlockType) },
         ]);
+        setBlockKeys((keys) => [...keys, crypto.randomUUID()]);
     }
 
     function submitGenerate() {
@@ -577,7 +598,7 @@ export default function SalespageEditor({
                 <div className="space-y-4">
                     {form.data.content.map((block, i) => (
                         <div
-                            key={i}
+                            key={blockKeys[i]}
                             className="space-y-2 rounded-lg border p-4"
                         >
                             <div className="flex items-center justify-between">

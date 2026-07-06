@@ -86,12 +86,14 @@ type Summary = {
     best_selling_products: BestSellingProduct[];
 };
 
+const priceFormatter = new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    maximumFractionDigits: 0,
+});
+
 function formatPrice(price: string) {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        maximumFractionDigits: 0,
-    }).format(Number(price));
+    return priceFormatter.format(Number(price));
 }
 
 const STAT_ACCENT_CLASS = {

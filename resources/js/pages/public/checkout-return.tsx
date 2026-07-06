@@ -1,8 +1,8 @@
 import { Head, Link } from '@inertiajs/react';
 import { Mail, Package } from 'lucide-react';
 import MetaPixel from '@/components/meta-pixel';
-import type { MetaPixelEvent } from '@/components/meta-pixel';
 import { Badge } from '@/components/ui/badge';
+import type { MetaPixelEvent } from '@/lib/meta-pixel';
 
 type OrderStatus =
     | 'pending'
@@ -20,12 +20,14 @@ const NEXT_STEPS_STATUSES: OrderStatus[] = [
     'completed',
 ];
 
+const priceFormatter = new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    maximumFractionDigits: 0,
+});
+
 function formatPrice(price: string) {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        maximumFractionDigits: 0,
-    }).format(Number(price));
+    return priceFormatter.format(Number(price));
 }
 
 const statusMessage: Record<OrderStatus, string> = {
@@ -65,6 +67,7 @@ export default function CheckoutReturn({
         status: OrderStatus;
         total: string;
         items: {
+            id: number;
             product_name: string;
             quantity: number;
             unit_price: string;
@@ -115,9 +118,9 @@ export default function CheckoutReturn({
                     </div>
 
                     <div className="space-y-2">
-                        {order.items.map((item, i) => (
+                        {order.items.map((item) => (
                             <div
-                                key={i}
+                                key={item.id}
                                 className="flex items-center justify-between text-sm"
                             >
                                 <span>

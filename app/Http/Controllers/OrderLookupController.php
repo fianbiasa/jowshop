@@ -65,6 +65,7 @@ class OrderLookupController extends Controller
                     ? $order->resumePaymentUrl()
                     : null,
                 'items' => $order->items->map(fn ($item) => [
+                    'id' => $item->id,
                     'product_name' => $item->product->name,
                     'quantity' => $item->quantity,
                     'unit_price' => $item->unit_price,

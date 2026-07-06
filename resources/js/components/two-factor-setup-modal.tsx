@@ -1,7 +1,7 @@
 import { Form } from '@inertiajs/react';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
 import { Check, Copy, ScanLine } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import AlertError from '@/components/alert-error';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -112,11 +112,14 @@ function TwoFactorSetupStep({
                                         type="text"
                                         readOnly
                                         value={manualSetupKey}
+                                        aria-label="Manual setup key"
                                         className="h-full w-full bg-background p-3 text-foreground outline-none"
                                     />
                                     <button
+                                        type="button"
                                         onClick={() => copy(manualSetupKey)}
                                         className="border-l border-border px-3 hover:bg-muted"
+                                        aria-label="Copy setup key"
                                     >
                                         <IconComponent className="w-4" />
                                     </button>
@@ -141,9 +144,11 @@ function TwoFactorVerificationStep({
     const pinInputContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        setTimeout(() => {
+        const timeoutId = setTimeout(() => {
             pinInputContainerRef.current?.querySelector('input')?.focus();
         }, 0);
+
+        return () => clearTimeout(timeoutId);
     }, []);
 
     return (
@@ -229,7 +234,6 @@ type Props = {
     qrCodeSvg: string | null;
     manualSetupKey: string | null;
     clearSetupData: () => void;
-    fetchSetupData: () => Promise<void>;
     errors: string[];
 };
 
@@ -241,17 +245,16 @@ export default function TwoFactorSetupModal({
     qrCodeSvg,
     manualSetupKey,
     clearSetupData,
-    fetchSetupData,
     errors,
 }: Props) {
     const [showVerificationStep, setShowVerificationStep] =
         useState<boolean>(false);
 
-    const modalConfig = useMemo<{
+    const modalConfig: {
         title: string;
         description: string;
         buttonText: string;
-    }>(() => {
+    } = (() => {
         if (twoFactorEnabled) {
             return {
                 title: 'Two-factor authentication enabled',
@@ -276,19 +279,19 @@ export default function TwoFactorSetupModal({
                 'To finish enabling two-factor authentication, scan the QR code or enter the setup key in your authenticator app',
             buttonText: 'Continue',
         };
-    }, [twoFactorEnabled, showVerificationStep]);
+    })();
 
-    const resetModalState = useCallback(() => {
+    const resetModalState = () => {
         setShowVerificationStep(false);
         clearSetupData();
-    }, [clearSetupData]);
+    };
 
-    const handleClose = useCallback(() => {
+    const handleClose = () => {
         resetModalState();
         onClose();
-    }, [onClose, resetModalState]);
+    };
 
-    const handleModalNextStep = useCallback(() => {
+    const handleModalNextStep = () => {
         if (requiresConfirmation) {
             setShowVerificationStep(true);
 
@@ -296,19 +299,7 @@ export default function TwoFactorSetupModal({
         }
 
         handleClose();
-    }, [requiresConfirmation, handleClose]);
-
-    const fetchSetupDataRef = useRef(fetchSetupData);
-
-    useEffect(() => {
-        fetchSetupDataRef.current = fetchSetupData;
-    }, [fetchSetupData]);
-
-    useEffect(() => {
-        if (isOpen && !qrCodeSvg) {
-            fetchSetupDataRef.current();
-        }
-    }, [isOpen, qrCodeSvg]);
+    };
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>

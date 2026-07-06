@@ -1,0 +1,74 @@
+type Fbq = {
+    (...args: unknown[]): void;
+    callMethod?: (...args: unknown[]) => void;
+    queue: unknown[];
+    push: Fbq;
+    loaded: boolean;
+    version: string;
+};
+
+declare global {
+    interface Window {
+        fbq?: Fbq;
+        _fbq?: Fbq;
+    }
+}
+
+export type MetaPixelEvent = {
+    pixel_id: string;
+    event_name: string;
+    event_id: string;
+    value?: number;
+    currency?: string;
+};
+
+const initializedPixelIds = new Set<string>();
+
+export function loadPixelScript(pixelId: string) {
+    if (!window.fbq) {
+        const fbq = function (...args: unknown[]) {
+            if (fbq.callMethod) {
+                fbq.callMethod(...args);
+            } else {
+                fbq.queue.push(args);
+            }
+        } as Fbq;
+
+        fbq.queue = [];
+        fbq.loaded = true;
+        fbq.version = '2.0';
+        fbq.push = fbq;
+        window.fbq = fbq;
+        window._fbq ??= fbq;
+
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://connect.facebook.net/en_US/fbevents.js';
+        document.head.appendChild(script);
+    }
+
+    // Inertia is an SPA — navigating between pages remounts this component
+    // without a full page reload, so guard against re-`init`-ing the same
+    // pixel ID on every navigation (fbq warns loudly about this).
+    if (!initializedPixelIds.has(pixelId)) {
+        window.fbq('init', pixelId);
+        initializedPixelIds.add(pixelId);
+    }
+}
+
+/**
+ * Fire a browser-side Facebook Pixel event outside the page-load-driven
+ * <MetaPixel> flow — e.g. on a button click, immediately, rather than
+ * waiting for the next page render. Pass the same `eventId` used for the
+ * matching server-side CAPI send (see SharesMetaPixelProp) so Meta can
+ * deduplicate the two into a single counted event.
+ */
+export function trackMetaPixelEvent(
+    pixelId: string,
+    eventName: string,
+    eventId: string,
+    customData?: { value: number; currency: string },
+) {
+    loadPixelScript(pixelId);
+    window.fbq?.('track', eventName, customData, { eventID: eventId });
+}

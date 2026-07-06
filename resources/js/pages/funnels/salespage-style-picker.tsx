@@ -31,9 +31,7 @@ function StylePreview({ style }: { style: Style }) {
             className={`relative h-28 w-full overflow-hidden rounded-md border ${PAGE_BG_CLASS[style] || 'bg-white'}`}
         >
             <div className="absolute top-1/2 left-1/2 w-[240px] origin-center -translate-x-1/2 -translate-y-1/2 scale-[0.38] space-y-2 text-center">
-                <div className={HEADLINE_CLASS[style]}>
-                    Judul Menarik Anda
-                </div>
+                <div className={HEADLINE_CLASS[style]}>Judul Menarik Anda</div>
                 <div className={SUBHEADLINE_CLASS[style]}>
                     Sub judul pendukung di sini
                 </div>
@@ -71,9 +69,7 @@ export default function SalespageStylePicker({
                                 checked={isSelected}
                                 onChange={() => onChange(option.value)}
                             />
-                            <span className="font-medium">
-                                {option.label}
-                            </span>
+                            <span className="font-medium">{option.label}</span>
                         </span>
                         <StylePreview style={option.value} />
                         <span className="text-xs text-muted-foreground">

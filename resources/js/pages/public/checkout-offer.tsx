@@ -1,6 +1,6 @@
 import { Form, Head } from '@inertiajs/react';
 import { useState } from 'react';
-import { trackMetaPixelEvent } from '@/components/meta-pixel';
+import { trackMetaPixelEvent } from '@/lib/meta-pixel';
 import {
     CTA_BUTTON_CLASS,
     HEADLINE_CLASS,
@@ -14,12 +14,14 @@ import {
 import { respond } from '@/routes/public/checkout/offer';
 import type { SalespageStyle as Style } from '@/types/models';
 
+const priceFormatter = new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    maximumFractionDigits: 0,
+});
+
 function formatPrice(price: number) {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        maximumFractionDigits: 0,
-    }).format(price);
+    return priceFormatter.format(price);
 }
 
 export default function CheckoutOffer({

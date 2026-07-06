@@ -32,12 +32,13 @@ const statusVariant: Record<
     archived: 'secondary',
 };
 
-const formatPrice = (price: string) =>
-    new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        maximumFractionDigits: 0,
-    }).format(Number(price));
+const priceFormatter = new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    maximumFractionDigits: 0,
+});
+
+const formatPrice = (price: string) => priceFormatter.format(Number(price));
 
 export default function Index({ products }: { products: Paginated<Product> }) {
     return (

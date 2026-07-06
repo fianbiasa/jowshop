@@ -24,12 +24,14 @@ import { index } from '@/routes/orders';
 import { update as updateShipment } from '@/routes/orders/shipment';
 import type { Order } from '@/types/models';
 
+const priceFormatter = new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    maximumFractionDigits: 0,
+});
+
 function formatPrice(price: string) {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        maximumFractionDigits: 0,
-    }).format(Number(price));
+    return priceFormatter.format(Number(price));
 }
 
 export default function Show({ order }: { order: Order }) {

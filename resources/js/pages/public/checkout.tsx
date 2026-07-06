@@ -2,19 +2,21 @@ import { Head, useForm } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import InputError from '@/components/input-error';
 import MetaPixel from '@/components/meta-pixel';
-import type { MetaPixelEvent } from '@/components/meta-pixel';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import type { MetaPixelEvent } from '@/lib/meta-pixel';
 import { store } from '@/routes/public/checkout';
 import { search as searchDestinations } from '@/routes/public/checkout/destinations';
 
+const priceFormatter = new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    maximumFractionDigits: 0,
+});
+
 function formatPrice(price: string) {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        maximumFractionDigits: 0,
-    }).format(Number(price));
+    return priceFormatter.format(Number(price));
 }
 
 type Destination = { id: string; label: string };

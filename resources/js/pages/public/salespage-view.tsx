@@ -1,6 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import MetaPixel from '@/components/meta-pixel';
-import type { MetaPixelEvent } from '@/components/meta-pixel';
+import type { MetaPixelEvent } from '@/lib/meta-pixel';
 import {
     ASPECT_RATIO_CLASS,
     CTA_BUTTON_CLASS,
@@ -50,21 +50,23 @@ function getVimeoEmbedUrl(url: string): string | null {
     return match ? `https://player.vimeo.com/video/${match[1]}` : null;
 }
 
+const priceFormatter = new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    maximumFractionDigits: 0,
+});
+
 function formatPrice(price: string) {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        maximumFractionDigits: 0,
-    }).format(Number(price));
+    return priceFormatter.format(Number(price));
 }
 
 function BenefitList({ items, style }: { items: string[]; style: Style }) {
     if (style === 'bold') {
         return (
             <div className="mx-auto flex max-w-xl flex-col items-center gap-3">
-                {items.map((item, i) => (
+                {items.map((item) => (
                     <span
-                        key={i}
+                        key={item}
                         className="inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-4 py-2 text-sm font-medium text-green-800"
                     >
                         <span aria-hidden>✓</span>
@@ -78,8 +80,8 @@ function BenefitList({ items, style }: { items: string[]; style: Style }) {
     if (style === 'editorial') {
         return (
             <ul className="mx-auto max-w-xl space-y-4 text-lg leading-relaxed text-stone-700">
-                {items.map((item, i) => (
-                    <li key={i} className="flex gap-3">
+                {items.map((item) => (
+                    <li key={item} className="flex gap-3">
                         <span aria-hidden className="text-stone-400">
                             —
                         </span>
@@ -92,8 +94,8 @@ function BenefitList({ items, style }: { items: string[]; style: Style }) {
 
     return (
         <ul className="mx-auto max-w-xl space-y-3">
-            {items.map((item, i) => (
-                <li key={i} className="flex items-start gap-2">
+            {items.map((item) => (
+                <li key={item} className="flex items-start gap-2">
                     <span aria-hidden className="mt-1 text-green-600">
                         ✓
                     </span>
@@ -163,9 +165,9 @@ function Faq({
     if (style === 'bold') {
         return (
             <div className="mx-auto max-w-xl space-y-3">
-                {items.map((item, i) => (
+                {items.map((item) => (
                     <div
-                        key={i}
+                        key={item.question}
                         className="rounded-lg border border-amber-100 bg-amber-50/50 p-4"
                     >
                         <div className="font-semibold text-stone-900">
@@ -183,8 +185,8 @@ function Faq({
     if (style === 'editorial') {
         return (
             <div className="mx-auto max-w-xl space-y-6">
-                {items.map((item, i) => (
-                    <div key={i}>
+                {items.map((item) => (
+                    <div key={item.question}>
                         <div className="text-lg font-semibold text-stone-900">
                             {item.question}
                         </div>
@@ -199,8 +201,8 @@ function Faq({
 
     return (
         <div className="mx-auto max-w-xl space-y-4">
-            {items.map((item, i) => (
-                <div key={i}>
+            {items.map((item) => (
+                <div key={item.question}>
                     <div className="font-medium">{item.question}</div>
                     <p className="text-sm text-muted-foreground">
                         {item.answer}
@@ -264,6 +266,7 @@ function VideoBlock({
                 <video
                     src={url}
                     controls
+                    aria-label="Video produk"
                     className="h-full w-full object-cover"
                 />
             </div>
@@ -283,9 +286,17 @@ function VideoBlock({
         >
             <iframe
                 src={embedUrl}
+                title={`Video ${source === 'vimeo' ? 'Vimeo' : 'YouTube'}`}
                 className="h-full w-full"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
+                // allow-scripts + allow-same-origin are both required for the
+                // YouTube/Vimeo player itself to work (postMessage API,
+                // fullscreen). Safe here because embedUrl is only ever
+                // produced by getYoutubeEmbedUrl/getVimeoEmbedUrl above,
+                // which regex-match into a fixed youtube.com/vimeo.com
+                // embed path — never an arbitrary/untrusted origin.
+                sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"
             />
         </div>
     );

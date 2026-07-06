@@ -1,6 +1,6 @@
 import { Form } from '@inertiajs/react';
 import { ShieldCheck } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import Heading from '@/components/heading';
 import TwoFactorRecoveryCodes from '@/components/two-factor-recovery-codes';
 import TwoFactorSetupModal from '@/components/two-factor-setup-modal';
@@ -30,15 +30,6 @@ export default function ManageTwoFactor(props: Props) {
         errors,
     } = useTwoFactorAuth();
     const [showSetupModal, setShowSetupModal] = useState<boolean>(false);
-    const prevTwoFactorEnabled = useRef(twoFactorEnabled);
-
-    useEffect(() => {
-        if (prevTwoFactorEnabled.current && !twoFactorEnabled) {
-            clearTwoFactorAuthData();
-        }
-
-        prevTwoFactorEnabled.current = twoFactorEnabled;
-    }, [twoFactorEnabled, clearTwoFactorAuthData]);
 
     if (!(props.canManageTwoFactor ?? false)) {
         return null;
@@ -60,7 +51,10 @@ export default function ManageTwoFactor(props: Props) {
                     </p>
 
                     <div className="relative inline">
-                        <Form {...disable.form()}>
+                        <Form
+                            {...disable.form()}
+                            onSuccess={clearTwoFactorAuthData}
+                        >
                             {({ processing }) => (
                                 <Button
                                     variant="destructive"
@@ -97,7 +91,10 @@ export default function ManageTwoFactor(props: Props) {
                         ) : (
                             <Form
                                 {...enable.form()}
-                                onSuccess={() => setShowSetupModal(true)}
+                                onSuccess={() => {
+                                    setShowSetupModal(true);
+                                    fetchSetupData();
+                                }}
                             >
                                 {({ processing }) => (
                                     <Button type="submit" disabled={processing}>
@@ -118,7 +115,6 @@ export default function ManageTwoFactor(props: Props) {
                 qrCodeSvg={qrCodeSvg}
                 manualSetupKey={manualSetupKey}
                 clearSetupData={clearSetupData}
-                fetchSetupData={fetchSetupData}
                 errors={errors}
             />
         </div>
