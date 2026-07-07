@@ -27,6 +27,16 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withSchedule(function (Schedule $schedule): void {
         $schedule->command(SendPaymentReminders::class)->hourly();
+
+        // Processes queued jobs (Meta CAPI events, etc.) via the same cron
+        // entry the scheduler itself needs — no Supervisor/persistent
+        // process required, so this works on shared hosting too, not just
+        // servers with root access. Exits after each minute's worth of
+        // work (or 55s, whichever comes first) so it never overlaps with
+        // the next run.
+        $schedule->command('queue:work --stop-when-empty --max-time=55')
+            ->everyMinute()
+            ->withoutOverlapping();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

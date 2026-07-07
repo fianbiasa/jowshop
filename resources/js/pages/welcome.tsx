@@ -1,7 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { BarChart3, CreditCard, GitBranch, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { dashboard, login, register } from '@/routes';
+import { dashboard, login } from '@/routes';
 import { create as orderLookupCreate } from '@/routes/order-lookup';
 import { create as shippingEstimateCreate } from '@/routes/shipping-estimate';
 import { create as trackingCreate } from '@/routes/tracking';
@@ -82,14 +82,9 @@ export default function Welcome() {
                                 <Link href={dashboard()}>Buka Dashboard</Link>
                             </Button>
                         ) : (
-                            <>
-                                <Button variant="ghost" asChild>
-                                    <Link href={login()}>Masuk</Link>
-                                </Button>
-                                <Button asChild>
-                                    <Link href={register()}>Daftar</Link>
-                                </Button>
-                            </>
+                            <Button variant="ghost" asChild>
+                                <Link href={login()}>Masuk</Link>
+                            </Button>
                         )}
                     </nav>
                 </header>
@@ -112,16 +107,9 @@ export default function Welcome() {
                                     </Link>
                                 </Button>
                             ) : (
-                                <>
-                                    <Button size="lg" asChild>
-                                        <Link href={register()}>
-                                            Mulai Sekarang
-                                        </Link>
-                                    </Button>
-                                    <Button size="lg" variant="outline" asChild>
-                                        <Link href={login()}>Masuk</Link>
-                                    </Button>
-                                </>
+                                <Button size="lg" asChild>
+                                    <Link href={login()}>Masuk</Link>
+                                </Button>
                             )}
                         </div>
                     </div>

@@ -161,7 +161,12 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // Registration is disabled: this app has no per-user data isolation
+        // (orders, funnels, products, and payment/shipping credentials are
+        // all global, not scoped per account), so anyone who could register
+        // would get full access to every customer's data. Re-enable only
+        // after real multi-tenancy is built.
+        // Features::registration(),
         Features::resetPasswords(),
         Features::emailVerification(),
         Features::twoFactorAuthentication([
