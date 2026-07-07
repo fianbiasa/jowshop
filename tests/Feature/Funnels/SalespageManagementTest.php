@@ -99,6 +99,27 @@ class SalespageManagementTest extends TestCase
         $this->assertSame(SalespageStyle::Bold, $salespage->style);
     }
 
+    public function test_salespage_style_can_be_changed_to_ledger(): void
+    {
+        $user = User::factory()->create();
+        $funnel = Funnel::factory()->for($user, 'creator')->create();
+        $salespage = Salespage::factory()->create([
+            'funnel_id' => $funnel->id,
+            'style' => SalespageStyle::Minimal,
+        ]);
+
+        $response = $this->actingAs($user)->put(route('funnels.salespage.update', $funnel), [
+            'title' => $salespage->title,
+            'content' => $salespage->content,
+            'style' => 'ledger',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+
+        $salespage->refresh();
+        $this->assertSame(SalespageStyle::Ledger, $salespage->style);
+    }
+
     public function test_uploading_an_image_block_stores_the_file_and_persists_its_public_url(): void
     {
         Storage::fake('public');
@@ -172,6 +193,26 @@ class SalespageManagementTest extends TestCase
         $this->assertSame('divider', $salespage->content[1]['type']);
         $this->assertSame('spacer', $salespage->content[2]['type']);
         $this->assertSame('lg', $salespage->content[2]['data']['height']);
+    }
+
+    public function test_paragraph_block_preserves_line_breaks(): void
+    {
+        $user = User::factory()->create();
+        $funnel = Funnel::factory()->for($user, 'creator')->create();
+
+        $response = $this->actingAs($user)->put(route('funnels.salespage.update', $funnel), [
+            'title' => 'Kopi Terbaik',
+            'content' => [
+                ['type' => 'paragraph', 'data' => ['text' => "Baris pertama.\nBaris kedua.\nBaris ketiga."]],
+            ],
+            'style' => 'minimal',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+
+        $salespage = Salespage::query()->where('funnel_id', $funnel->id)->firstOrFail();
+        $this->assertSame('paragraph', $salespage->content[0]['type']);
+        $this->assertSame("Baris pertama.\nBaris kedua.\nBaris ketiga.", $salespage->content[0]['data']['text']);
     }
 
     public function test_salespage_can_be_generated_by_ai(): void

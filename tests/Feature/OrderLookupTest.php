@@ -46,6 +46,30 @@ class OrderLookupTest extends TestCase
         );
     }
 
+    public function test_result_page_uses_the_funnels_salespage_style(): void
+    {
+        $customer = Customer::factory()->create(['email' => 'budi@example.com']);
+        $product = Product::factory()->digital()->published()->create();
+        $funnel = Funnel::factory()->published()->create(['product_id' => $product->id]);
+        Salespage::factory()->published()->create(['funnel_id' => $funnel->id, 'style' => 'ledger']);
+        $order = Order::factory()->create([
+            'funnel_id' => $funnel->id,
+            'customer_id' => $customer->id,
+        ]);
+
+        $this->post(route('order-lookup.store'), [
+            'email' => 'budi@example.com',
+            'order_number' => $order->order_number,
+        ]);
+
+        $response = $this->get(route('order-lookup.show', $order->order_number));
+
+        $response->assertInertia(fn ($page) => $page
+            ->component('public/order-lookup-result')
+            ->where('style', 'ledger')
+        );
+    }
+
     public function test_wrong_email_is_rejected(): void
     {
         $order = $this->orderFor('budi@example.com');

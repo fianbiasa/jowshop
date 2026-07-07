@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detail Pesanan #ORD-NWNVEOL8 — Jowshop</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #0f172a;
+    --primary-light: #1e293b;
+    --success: #10b981;
+    --success-light: #d1fae5;
+    --warning: #f59e0b;
+    --warning-light: #fef3c7;
+    --info: #3b82f6;
+    --info-light: #dbeafe;
+    --danger: #ef4444;
+    --dark: #0f172a;
+    --gray-900: #1e293b;
+    --gray-800: #334155;
+    --gray-700: #475569;
+    --gray-600: #64748b;
+    --gray-500: #94a3b8;
+    --gray-400: #cbd5e1;
+    --gray-300: #e2e8f0;
+    --gray-200: #f1f5f9;
+    --gray-100: #f8fafc;
+    --white: #ffffff;
+    --radius: 16px;
+    --radius-sm: 12px;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--gray-100);
+    color: var(--gray-900);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  .container { max-width: 800px; margin: 0 auto; padding: 0 20px; }
+
+  /* Header */
+  .topbar {
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-300);
+    padding: 16px 0;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .topbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--primary);
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--success); }
+  .topbar-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .btn-ghost {
+    background: none;
+    border: 1px solid var(--gray-300);
+    color: var(--gray-700);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  .btn-ghost:hover { background: var(--gray-100); }
+
+  /* Success Banner */
+  .success-banner {
+    background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+    color: var(--white);
+    padding: 40px 0 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .success-banner::before {
+    content: '';
+    position: absolute;
+    top: -50%; right: -20%;
+    width: 400px; height: 400px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+  }
+  .success-icon {
+    width: 72px; height: 72px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 32px;
+    backdrop-filter: blur(4px);
+    border: 2px solid rgba(255,255,255,0.3);
+  }
+  .success-banner h1 {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .success-banner p {
+    font-size: 15px;
+    opacity: 0.9;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* Order Info Bar */
+  .order-bar {
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-300);
+    padding: 16px 0;
+  }
+  .order-bar-inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .order-meta {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .meta-label {
+    font-size: 11px;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  .meta-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gray-900);
+  }
+  .meta-value.code {
+    font-family: 'SF Mono', monospace;
+    background: var(--gray-200);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--success-light);
+    color: #065f46;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid #a7f3d0;
+  }
+  .status-badge::before {
+    content: '';
+    width: 8px; height: 8px;
+    background: var(--success);
+    border-radius: 50%;
+  }
+
+  /* Timeline */
+  .timeline-section {
+    padding: 32px 0;
+  }
+  .timeline {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    padding: 0 10px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 10%; right: 10%;
+    height: 3px;
+    background: var(--gray-300);
+    z-index: 0;
+  }
+  .timeline-progress {
+    position: absolute;
+    top: 20px;
+    left: 10%;
+    width: 50%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--success), var(--info));
+    z-index: 1;
+    border-radius: 999px;
+  }
+  .timeline-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    z-index: 2;
+    flex: 1;
+  }
+  .step-dot {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    background: var(--white);
+    border: 3px solid var(--gray-300);
+    transition: all 0.3s;
+  }
+  .step-dot.done {
+    background: var(--success);
+    border-color: var(--success);
+    color: var(--white);
+  }
+  .step-dot.active {
+    background: var(--white);
+    border-color: var(--info);
+    color: var(--info);
+    box-shadow: 0 0 0 4px var(--info-light);
+  }
+  .step-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gray-600);
+    text-align: center;
+  }
+  .step-label.active { color: var(--info); font-weight: 700; }
+  .step-label.done { color: var(--success); }
+
+  /* Cards */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--gray-300);
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+  }
+  .card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-title .icon {
+    width: 32px; height: 32px;
+    background: var(--gray-100);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .card-body { padding: 20px 24px; }
+
+  /* Product Row */
+  .product-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .product-thumb {
+    width: 80px; height: 80px;
+    background: var(--gray-100);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 1px solid var(--gray-200);
+  }
+  .product-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .product-info { flex: 1; }
+  .product-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 4px;
+  }
+  .product-variant {
+    font-size: 13px;
+    color: var(--gray-600);
+    margin-bottom: 8px;
+  }
+  .product-qty {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--gray-100);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-700);
+  }
+  .product-price {
+    text-align: right;
+    min-width: 100px;
+  }
+  .product-price .price {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--dark);
+  }
+  .product-price .qty {
+    font-size: 12px;
+    color: var(--gray-500);
+    margin-top: 2px;
+  }
+
+  /* Price Breakdown */
+  .price-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    font-size: 14px;
+    color: var(--gray-700);
+    border-bottom: 1px dashed var(--gray-200);
+  }
+  .price-row:last-child { border-bottom: none; }
+  .price-row.total {
+    padding-top: 16px;
+    margin-top: 4px;
+    border-top: 2px solid var(--gray-300);
+    border-bottom: none;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--dark);
+  }
+  .price-row .discount { color: var(--success); font-weight: 600; }
+
+  /* Address */
+  .address-block {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .address-icon {
+    width: 40px; height: 40px;
+    background: var(--info-light);
+    color: var(--info);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .address-content h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 4px;
+  }
+  .address-content p {
+    font-size: 13px;
+    color: var(--gray-600);
+    line-height: 1.6;
+  }
+  .address-content .phone {
+    margin-top: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-800);
+  }
+
+  /* Payment */
+  .payment-method {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--gray-100);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--gray-200);
+  }
+  .payment-icon {
+    width: 40px; height: 28px;
+    background: var(--white);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary);
+    border: 1px solid var(--gray-300);
+  }
+  .payment-info { flex: 1; }
+  .payment-info .name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--dark);
+  }
+  .payment-info .detail {
+    font-size: 12px;
+    color: var(--gray-500);
+  }
+  .payment-status {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--success);
+    background: var(--success-light);
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+
+  /* Actions */
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    text-decoration: none;
+    border: none;
+    transition: all 0.2s;
+  }
+  .btn-outline {
+    background: var(--white);
+    color: var(--gray-800);
+    border: 1.5px solid var(--gray-300);
+  }
+  .btn-outline:hover { background: var(--gray-100); }
+  .btn-solid {
+    background: var(--dark);
+    color: var(--white);
+    box-shadow: var(--shadow);
+  }
+  .btn-solid:hover { background: var(--gray-800); transform: translateY(-1px); }
+  .btn-full { grid-column: 1 / -1; }
+
+  /* Footer */
+  .page-footer {
+    text-align: center;
+    padding: 32px 0 48px;
+    font-size: 12px;
+    color: var(--gray-500);
+  }
+  .page-footer a { color: var(--gray-700); text-decoration: none; font-weight: 600; }
+
+  @media (max-width: 640px) {
+    .order-bar-inner { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .order-meta { gap: 16px; width: 100%; }
+    .timeline-step .step-label { font-size: 10px; }
+    .actions { grid-template-columns: 1fr; }
+    .product-row { flex-wrap: wrap; }
+    .product-price { width: 100%; text-align: left; margin-top: 8px; }
+  }
+</style>
+<base target="_blank">
+</head>
+<body>
+
+<!-- Topbar -->
+<div class="topbar">
+  <div class="container">
+    <div class="topbar-inner">
+      <div class="logo">Jow<span>shop</span></div>
+      <div class="topbar-actions">
+        <button class="btn-ghost">🔍 Cek Pesanan Lain</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Success Banner -->
+<div class="success-banner">
+  <div class="container">
+    <div class="success-icon">✓</div>
+    <h1>Pesanan Berhasil Dibuat!</h1>
+    <p>Terima kasih telah berbelanja. Kami akan segera memproses pesanan Anda dan mengirimkan konfirmasi via WhatsApp & Email.</p>
+  </div>
+</div>
+
+<!-- Order Info Bar -->
+<div class="order-bar">
+  <div class="container">
+    <div class="order-bar-inner">
+      <div class="order-meta">
+        <div class="meta-item">
+          <span class="meta-label">Nomor Pesanan</span>
+          <span class="meta-value code">ORD-NWNVEOL8</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Tanggal</span>
+          <span class="meta-value">7 Juli 2026</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Metode</span>
+          <span class="meta-value">Transfer Bank</span>
+        </div>
+      </div>
+      <div class="status-badge">Pembayaran Diterima</div>
+    </div>
+  </div>
+</div>
+
+<!-- Timeline -->
+<div class="timeline-section">
+  <div class="container">
+    <div class="timeline">
+      <div class="timeline-progress"></div>
+      <div class="timeline-step">
+        <div class="step-dot done">✓</div>
+        <span class="step-label done">Dipesan</span>
+      </div>
+      <div class="timeline-step">
+        <div class="step-dot done">✓</div>
+        <span class="step-label done">Dibayar</span>
+      </div>
+      <div class="timeline-step">
+        <div class="step-dot active">📦</div>
+        <span class="step-label active">Diproses</span>
+      </div>
+      <div class="timeline-step">
+        <div class="step-dot">🚚</div>
+        <span class="step-label">Dikirim</span>
+      </div>
+      <div class="timeline-step">
+        <div class="step-dot">🏠</div>
+        <span class="step-label">Sampai</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container" style="padding-bottom: 40px;">
+
+  <!-- Produk -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">🛍️</span> Detail Produk</div>
+      <span style="font-size: 12px; color: var(--gray-500);">1 Item</span>
+    </div>
+    <div class="card-body">
+      <div class="product-row">
+        <div class="product-thumb">
+          <img src="https://images.unsplash.com/photo-1625246333195-f89889974e48?w=200&q=80" alt="Betani Booster">
+        </div>
+        <div class="product-info">
+          <div class="product-name">Betani Booster — Pupuk Premium Bioteknologi</div>
+          <div class="product-variant">Varian: 1 Box (25ml x 3 botol)</div>
+          <div class="product-qty">Qty: 1</div>
+        </div>
+        <div class="product-price">
+          <div class="price">Rp 150.000</div>
+          <div class="qty">@ Rp 150.000</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ringkasan Harga -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">💰</span> Ringkasan Pembayaran</div>
+    </div>
+    <div class="card-body">
+      <div class="price-row">
+        <span>Subtotal Produk</span>
+        <span>Rp 150.000</span>
+      </div>
+      <div class="price-row">
+        <span>Ongkir (JNE Reguler)</span>
+        <span>Rp 0</span>
+      </div>
+      <div class="price-row">
+        <span>Diskon Promo</span>
+        <span class="discount">- Rp 0</span>
+      </div>
+      <div class="price-row">
+        <span>Biaya Admin</span>
+        <span>Rp 0</span>
+      </div>
+      <div class="price-row total">
+        <span>Total Pembayaran</span>
+        <span>Rp 150.000</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alamat -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">📍</span> Alamat Pengiriman</div>
+    </div>
+    <div class="card-body">
+      <div class="address-block">
+        <div class="address-icon">🏠</div>
+        <div class="address-content">
+          <h4>Zulfianto</h4>
+          <p>Jl. Merdeka No. 123, RT 02 / RW 05<br>Kel. Sukamaju, Kec. Cibeunying Kidul<br>Kota Bandung, Jawa Barat 40125</p>
+          <div class="phone">📱 0812-3456-7890</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Metode Pembayaran -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">💳</span> Metode Pembayaran</div>
+    </div>
+    <div class="card-body">
+      <div class="payment-method">
+        <div class="payment-icon">BCA</div>
+        <div class="payment-info">
+          <div class="name">Transfer Bank BCA</div>
+          <div class="detail">Dibayar pada 7 Juli 2026, 14:32 WIB</div>
+        </div>
+        <div class="payment-status">LUNAS</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="actions">
+    <button class="btn btn-outline">🧾 Download Invoice</button>
+    <button class="btn btn-outline">💬 Chat Penjual</button>
+    <button class="btn btn-solid btn-full">🔄 Beli Lagi</button>
+  </div>
+
+</div>
+
+<div class="page-footer">
+  <div class="container">
+    <p>Butuh bantuan? Hubungi kami di <a href="#">support@jowshop.id</a> atau WhatsApp <a href="#">0812-9999-0000</a></p>
+    <p style="margin-top: 8px;">© 2026 Jowshop. All rights reserved.</p>
+  </div>
+</div>
+
+</body>
+</html>

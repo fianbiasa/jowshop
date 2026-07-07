@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Betani Booster — Pupuk Premium Bioteknologi</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #059669;
+    --primary-dark: #047857;
+    --primary-light: #d1fae5;
+    --accent: #f59e0b;
+    --accent-light: #fef3c7;
+    --dark: #0f172a;
+    --gray-900: #1e293b;
+    --gray-700: #334155;
+    --gray-500: #64748b;
+    --gray-300: #cbd5e1;
+    --gray-100: #f1f5f9;
+    --gray-50: #f8fafc;
+    --danger: #ef4444;
+    --danger-light: #fee2e2;
+    --white: #ffffff;
+    --radius: 16px;
+    --radius-sm: 12px;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-900);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+  img { max-width: 100%; display: block; }
+  .container { max-width: 720px; margin: 0 auto; padding: 0 20px; }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+    padding: 12px 0;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(180deg, var(--white) 0%, var(--gray-50) 100%);
+    padding: 40px 0 32px;
+    text-align: center;
+    position: relative;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--danger-light);
+    color: var(--danger);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 999px;
+    margin-bottom: 20px;
+    border: 1px solid #fecaca;
+    animation: pulse 2s infinite;
+  }
+  .hero-badge::before {
+    content: '';
+    width: 8px; height: 8px;
+    background: var(--danger);
+    border-radius: 50%;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  .hero h1 {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--dark);
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+  }
+  .hero h1 span { color: var(--primary); }
+  .hero-sub {
+    font-size: 16px;
+    color: var(--gray-700);
+    max-width: 500px;
+    margin: 0 auto 28px;
+  }
+  .hero-img-wrap {
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-xl);
+    margin-bottom: 28px;
+    background: var(--white);
+  }
+  .hero-img-wrap img { width: 100%; height: auto; object-fit: cover; }
+  .hero-img-tag {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: var(--accent);
+    color: var(--dark);
+    font-size: 11px;
+    font-weight: 800;
+    padding: 6px 12px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+  }
+
+  /* Price Box */
+  .price-box {
+    background: var(--white);
+    border: 2px solid var(--primary-light);
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+    margin-bottom: 32px;
+    box-shadow: var(--shadow);
+  }
+  .price-label {
+    font-size: 13px;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .price-old {
+    font-size: 18px;
+    color: var(--gray-500);
+    text-decoration: line-through;
+    margin-bottom: 4px;
+  }
+  .price-current {
+    font-size: 42px;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .price-note {
+    font-size: 13px;
+    color: var(--gray-500);
+    margin-bottom: 20px;
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+    font-size: 18px;
+    font-weight: 700;
+    padding: 18px 28px;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 8px 24px -4px rgba(5, 150, 105, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px -4px rgba(5, 150, 105, 0.5); }
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+  .btn-primary:hover::after { left: 100%; }
+  .btn-sub {
+    font-size: 12px;
+    color: var(--gray-500);
+    margin-top: 12px;
+  }
+  .guarantee {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--gray-700);
+    font-weight: 500;
+  }
+
+  /* Features */
+  .section { padding: 48px 0; }
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 32px;
+    color: var(--dark);
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .feature-card {
+    background: var(--white);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-100);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .feature-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .feature-icon {
+    width: 44px; height: 44px;
+    min-width: 44px;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+  .feature-text h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 4px;
+  }
+  .feature-text p {
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.5;
+  }
+
+  /* Urgency Bar */
+  .urgency {
+    background: linear-gradient(135deg, var(--accent-light) 0%, #fffbeb 100%);
+    border: 1px solid #fde68a;
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    text-align: center;
+    margin: 32px 0;
+  }
+  .urgency-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .urgency-text {
+    font-size: 14px;
+    color: var(--gray-700);
+    margin-bottom: 16px;
+  }
+  .stock-bar {
+    background: var(--white);
+    border-radius: 999px;
+    height: 10px;
+    overflow: hidden;
+    margin-bottom: 8px;
+    border: 1px solid #fde68a;
+  }
+  .stock-bar-fill {
+    background: linear-gradient(90deg, var(--danger), var(--accent));
+    height: 100%;
+    width: 18%;
+    border-radius: 999px;
+    transition: width 1s ease;
+  }
+  .stock-label {
+    font-size: 12px;
+    color: var(--danger);
+    font-weight: 700;
+  }
+
+  /* Testimonials */
+  .testimonials {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 32px 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--gray-100);
+  }
+  .testi-card {
+    background: var(--gray-50);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    margin-bottom: 16px;
+    border-left: 4px solid var(--primary);
+  }
+  .testi-card:last-child { margin-bottom: 0; }
+  .testi-stars { color: var(--accent); font-size: 16px; margin-bottom: 10px; letter-spacing: 2px; }
+  .testi-text {
+    font-size: 14px;
+    color: var(--gray-700);
+    font-style: italic;
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+  .testi-author {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .testi-avatar {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: var(--white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .testi-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--dark);
+  }
+  .testi-role {
+    font-size: 12px;
+    color: var(--gray-500);
+  }
+
+  /* FAQ */
+  .faq-item {
+    background: var(--white);
+    border-radius: var(--radius-sm);
+    margin-bottom: 12px;
+    border: 1px solid var(--gray-100);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  .faq-question {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 18px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--dark);
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: inherit;
+  }
+  .faq-question::after {
+    content: '+';
+    font-size: 20px;
+    color: var(--primary);
+    font-weight: 400;
+    transition: transform 0.3s;
+  }
+  .faq-item.active .faq-question::after { transform: rotate(45deg); }
+  .faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    padding: 0 20px;
+  }
+  .faq-item.active .faq-answer {
+    max-height: 300px;
+    padding: 0 20px 18px;
+  }
+  .faq-answer p {
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.6;
+  }
+
+  /* Footer CTA */
+  .footer-cta {
+    background: linear-gradient(135deg, var(--dark) 0%, var(--gray-900) 100%);
+    color: var(--white);
+    padding: 48px 0;
+    text-align: center;
+    margin-top: 48px;
+  }
+  .footer-cta h2 {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+  .footer-cta p {
+    font-size: 15px;
+    color: var(--gray-300);
+    margin-bottom: 24px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .footer-cta .btn-primary {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .footer-copy {
+    text-align: center;
+    padding: 24px 0;
+    font-size: 12px;
+    color: var(--gray-500);
+  }
+
+  /* Floating CTA */
+  .float-cta {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--white);
+    border-top: 1px solid var(--gray-100);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    z-index: 100;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+    transform: translateY(100%);
+    transition: transform 0.4s ease;
+  }
+  .float-cta.show { transform: translateY(0); }
+  .float-cta-info { flex: 1; }
+  .float-cta-price {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--primary);
+  }
+  .float-cta-label {
+    font-size: 11px;
+    color: var(--gray-500);
+  }
+  .float-cta .btn-primary {
+    width: auto;
+    padding: 12px 24px;
+    font-size: 14px;
+  }
+
+  @media (min-width: 640px) {
+    .hero h1 { font-size: 36px; }
+    .features-grid { grid-template-columns: 1fr 1fr; }
+    .float-cta { display: none; }
+  }
+</style>
+<base target="_blank">
+</head>
+<body>
+
+<div class="header">🚚 GRATIS ONGKIR SELURUH INDONESIA • GARANSI 100% UANG KEMBALI</div>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">STOK TERBATAS — SISA 18 PCS</div>
+    <h1>Betani Booster <span>Pupuk Premium</span> Bioteknologi Tetes</h1>
+    <p class="hero-sub">Hasil panen meningkat drastis hanya dalam 1 siklus tanam. Formula bioteknologi tetes, mudah diaplikasikan, hemat waktu.</p>
+
+    <div class="hero-img-wrap">
+      <img src="https://images.unsplash.com/photo-1625246333195-f89889974e48?w=800&q=80" alt="Betani Booster Product">
+      <span class="hero-img-tag">BEST SELLER</span>
+    </div>
+
+    <div class="price-box">
+      <div class="price-label">Harga Promo Khusus Hari Ini</div>
+      <div class="price-old">Rp 350.000</div>
+      <div class="price-current">Rp 150.000</div>
+      <div class="price-note">Hemat Rp 200.000 — Harga naik kapan saja</div>
+      <a href="#checkout" class="btn-primary">
+        <span>🛒</span> Pesan Sekarang — Bayar di Tempat
+      </a>
+      <div class="btn-sub">Atau transfer bank / e-wallet</div>
+      <div class="guarantee">
+        <span>🛡️</span> Garansi 30 Hari Uang Kembali — Tanpa Ribet
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="background: var(--white);">
+  <div class="container">
+    <h2 class="section-title">Kenapa Petani Pilih Betani?</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🌱</div>
+        <div class="feature-text">
+          <h3>Formula Bioteknologi</h3>
+          <p>Teknologi tetes pertama di dunia yang merangsang pertumbuhan akar dan daun secara optimal.</p>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⏱️</div>
+        <div class="feature-text">
+          <h3>Cepat Terlihat Hasilnya</h3>
+          <p>Perubahan signifikan pada tanaman hanya dalam 1–2 minggu penggunaan rutin.</p>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌾</div>
+        <div class="feature-text">
+          <h3>Universal & Aman</h3>
+          <p>Cocok untuk padi, jagung, cabai, tomat, dan semua jenis tanaman pangan maupun hortikultura.</p>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💧</div>
+        <div class="feature-text">
+          <h3>Mudah Digunakan</h3>
+          <p>Cukup teteskan sesuai dosis pada air penyiraman atau semprotan tanaman. Praktis & hemat.</p>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🏆</div>
+        <div class="feature-text">
+          <h3>Rekor MURI</h3>
+          <p>Terbukti mencatat rekor MURI untuk panen jagung terbanyak: 26,5 ton per hektar.</p>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📈</div>
+        <div class="feature-text">
+          <h3>Panen Melimpah</h3>
+          <p>Meningkatkan kualitas, bobot, dan keseragaman hasil panen secara signifikan.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="urgency">
+      <div class="urgency-title">⚡ Stok Menipis Cepat!</div>
+      <div class="urgency-text">Batch produksi terbatas. Begitu habis, harus menunggu produksi selanjutnya.</div>
+      <div class="stock-bar"><div class="stock-bar-fill"></div></div>
+      <div class="stock-label">Tersisa 18 dari 100 pcs — 82% sudah terjual hari ini</div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="background: var(--white);">
+  <div class="container">
+    <h2 class="section-title">Apa Kata Petani yang Sudah Coba?</h2>
+    <div class="testimonials">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"Sejak pakai BETANI, panen saya naik hampir 40%! Padinya lebih berat dan bulir lebih penuh. Nyesel baru coba sekarang!"</div>
+        <div class="testi-author">
+          <div class="testi-avatar">S</div>
+          <div>
+            <div class="testi-name">Pak Slamet</div>
+            <div class="testi-role">Petani Padi, Jawa Tengah</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"Awalnya coba-coba, ternyata hasilnya luar biasa. Cabai lebih besar, tahan hama, dan panen lebih cepat!"</div>
+        <div class="testi-author">
+          <div class="testi-avatar">R</div>
+          <div>
+            <div class="testi-name">Bu Ratna</div>
+            <div class="testi-role">Petani Cabai, Jawa Timur</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"BETANI benar-benar booster! Jagung saya tumbuh seragam, hasil melimpah. Sekarang selalu stok di gudang!"</div>
+        <div class="testi-author">
+          <div class="testi-avatar">H</div>
+          <div>
+            <div class="testi-name">Pak Herman</div>
+            <div class="testi-role">Petani Jagung, Lampung</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Pertanyaan yang Sering Diajukan</h2>
+    <div class="faq-item">
+      <button class="faq-question">Apakah BETANI aman untuk semua jenis tanaman?</button>
+      <div class="faq-answer"><p>Ya! BETANI diformulasikan khusus agar aman dan efektif untuk berbagai jenis tanaman pangan, sayuran, dan buah.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question">Berapa lama hasil bisa terlihat?</button>
+      <div class="faq-answer"><p>Banyak petani melaporkan perubahan signifikan hanya dalam 1–2 minggu penggunaan rutin.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question">Bagaimana cara pakainya?</button>
+      <div class="faq-answer"><p>Sangat mudah! Cukup teteskan sesuai dosis anjuran pada air penyiraman atau semprotan tanaman Anda.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question">Apakah stok selalu tersedia?</button>
+      <div class="faq-answer"><p>TIDAK! Stok terbatas setiap batch produksi. Begitu habis, Anda harus menunggu batch berikutnya.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="footer-cta" id="checkout">
+  <div class="container">
+    <h2>Jangan Biarkan Petani Lain Menyalip Anda!</h2>
+    <p>Setiap hari tanpa BETANI adalah hari yang terbuang. Risiko Anda NOL, keuntungan Anda MAKSIMAL.</p>
+    <a href="#" class="btn-primary">
+      <span>🛒</span> Pesan Sekarang — Rp 150.000
+    </a>
+    <div class="guarantee" style="color: var(--gray-300); margin-top: 20px;">
+      <span>🛡️</span> Garansi 30 Hari Uang Kembali
+    </div>
+  </div>
+</section>
+
+<div class="footer-copy">
+  © 2026 Betani Official. All rights reserved.<br>
+  www.betani-official.id
+</div>
+
+<!-- Floating CTA -->
+<div class="float-cta" id="floatCta">
+  <div class="float-cta-info">
+    <div class="float-cta-price">Rp 150.000</div>
+    <div class="float-cta-label">Harga promo hari ini</div>
+  </div>
+  <a href="#checkout" class="btn-primary">Pesan</a>
+</div>
+
+<script>
+  // FAQ Accordion
+  document.querySelectorAll('.faq-question').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.parentElement;
+      const isActive = item.classList.contains('active');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+      if (!isActive) item.classList.add('active');
+    });
+  });
+
+  // Show floating CTA on scroll
+  const floatCta = document.getElementById('floatCta');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 400) floatCta.classList.add('show');
+    else floatCta.classList.remove('show');
+  });
+</script>
+
+</body>
+</html>

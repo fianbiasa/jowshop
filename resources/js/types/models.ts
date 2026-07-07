@@ -121,7 +121,7 @@ export interface FunnelOffer {
     updated_at: string;
 }
 
-export type SalespageStyle = 'minimal' | 'bold' | 'editorial';
+export type SalespageStyle = 'minimal' | 'bold' | 'editorial' | 'ledger';
 
 export interface Salespage {
     id: number;

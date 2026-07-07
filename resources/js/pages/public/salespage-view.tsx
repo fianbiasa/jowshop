@@ -10,6 +10,7 @@ import {
     KICKER_CLASS,
     MAIN_CLASS,
     PAGE_BG_CLASS,
+    PARAGRAPH_CLASS,
     SPACER_HEIGHT_CLASS,
     SUBHEADLINE_CLASS,
 } from '@/lib/salespage-themes';
@@ -19,6 +20,7 @@ import type { SalespageStyle as Style } from '@/types/models';
 type Block =
     | { type: 'headline'; data: { text: string } }
     | { type: 'subheadline'; data: { text: string } }
+    | { type: 'paragraph'; data: { text: string } }
     | { type: 'benefit_list'; data: { items: string[] } }
     | { type: 'testimonial'; data: { name: string; quote: string } }
     | { type: 'faq'; data: { items: { question: string; answer: string }[] } }
@@ -92,6 +94,24 @@ function BenefitList({ items, style }: { items: string[]; style: Style }) {
         );
     }
 
+    if (style === 'ledger') {
+        return (
+            <ul className="mx-auto max-w-xl space-y-2 font-mono text-sm text-stone-800">
+                {items.map((item) => (
+                    <li
+                        key={item}
+                        className="flex gap-3 border-b border-dashed border-stone-300 pb-2"
+                    >
+                        <span aria-hidden className="text-teal-700">
+                            [x]
+                        </span>
+                        <span>{item}</span>
+                    </li>
+                ))}
+            </ul>
+        );
+    }
+
     return (
         <ul className="mx-auto max-w-xl space-y-3">
             {items.map((item) => (
@@ -145,6 +165,17 @@ function Testimonial({
         );
     }
 
+    if (style === 'ledger') {
+        return (
+            <div className="mx-auto max-w-xl border border-dashed border-stone-300 bg-white p-6">
+                <p className="text-stone-800">"{quote}"</p>
+                <p className="mt-3 border-t border-dashed border-stone-300 pt-3 font-mono text-xs tracking-wide text-stone-500 uppercase">
+                    — {name}
+                </p>
+            </div>
+        );
+    }
+
     return (
         <blockquote className="mx-auto max-w-xl rounded-lg border bg-muted/30 p-6 text-center italic">
             "{quote}"
@@ -191,6 +222,28 @@ function Faq({
                             {item.question}
                         </div>
                         <p className="mt-2 leading-relaxed text-stone-600">
+                            {item.answer}
+                        </p>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+
+    if (style === 'ledger') {
+        return (
+            <div className="mx-auto max-w-xl space-y-4 font-mono text-sm">
+                {items.map((item) => (
+                    <div
+                        key={item.question}
+                        className="border-b border-dashed border-stone-300 pb-4"
+                    >
+                        <div className="font-semibold text-stone-900">
+                            <span className="text-teal-700">T:</span>{' '}
+                            {item.question}
+                        </div>
+                        <p className="mt-1 text-stone-600">
+                            <span className="text-teal-700">J:</span>{' '}
                             {item.answer}
                         </p>
                     </div>
@@ -342,6 +395,12 @@ function BlockRenderer({
         case 'subheadline':
             return (
                 <p className={SUBHEADLINE_CLASS[style]}>
+                    {(block.data as { text: string }).text}
+                </p>
+            );
+        case 'paragraph':
+            return (
+                <p className={PARAGRAPH_CLASS[style]}>
                     {(block.data as { text: string }).text}
                 </p>
             );

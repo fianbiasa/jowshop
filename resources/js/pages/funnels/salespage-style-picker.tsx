@@ -23,6 +23,12 @@ const STYLE_OPTIONS: { value: Style; label: string; description: string }[] = [
         label: 'Editorial',
         description: 'Naratif & tenang, cocok untuk kelas/ecourse panjang.',
     },
+    {
+        value: 'ledger',
+        label: 'Nota',
+        description:
+            'Gaya kwitansi — angka & harga pakai monospace, garis putus-putus, cocok untuk produk yang mengandalkan transparansi & bukti bayar.',
+    },
 ];
 
 function StylePreview({ style }: { style: Style }) {
@@ -53,7 +59,7 @@ export default function SalespageStylePicker({
     onChange: (style: Style) => void;
 }) {
     return (
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {STYLE_OPTIONS.map((option) => {
                 const isSelected = value === option.value;
 

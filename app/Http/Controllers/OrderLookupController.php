@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\OrderStatus;
+use App\Enums\SalespageStyle;
 use App\Http\Requests\LookupOrderRequest;
 use App\Models\Order;
 use Illuminate\Http\RedirectResponse;
@@ -54,9 +55,10 @@ class OrderLookupController extends Controller
             return to_route('order-lookup.create');
         }
 
-        $order->load(['items.product', 'items.delivery', 'shipment']);
+        $order->load(['items.product', 'items.delivery', 'shipment', 'funnel.salespage']);
 
         return Inertia::render('public/order-lookup-result', [
+            'style' => $order->funnel->salespage?->style ?? SalespageStyle::Minimal,
             'order' => [
                 'order_number' => $order->order_number,
                 'status' => $order->status,

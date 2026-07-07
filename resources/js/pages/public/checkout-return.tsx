@@ -1,8 +1,16 @@
 import { Head, Link } from '@inertiajs/react';
 import { Mail, Package } from 'lucide-react';
 import MetaPixel from '@/components/meta-pixel';
+import OrderStatusTimeline from '@/components/order-status-timeline';
 import { Badge } from '@/components/ui/badge';
 import type { MetaPixelEvent } from '@/lib/meta-pixel';
+import {
+    CARD_CLASS,
+    HEADLINE_CLASS,
+    PAGE_BG_CLASS,
+    SECONDARY_BUTTON_CLASS,
+} from '@/lib/salespage-themes';
+import type { SalespageStyle as Style } from '@/types/models';
 
 type OrderStatus =
     | 'pending'
@@ -55,6 +63,7 @@ const statusVariant: Record<
 
 export default function CheckoutReturn({
     funnel,
+    style,
     order,
     thankYouMessage,
     metaPixel,
@@ -62,6 +71,7 @@ export default function CheckoutReturn({
     orderLookupUrl,
 }: {
     funnel: { name: string };
+    style: Style;
     order: {
         order_number: string;
         status: OrderStatus;
@@ -82,6 +92,7 @@ export default function CheckoutReturn({
     const showNextSteps = NEXT_STEPS_STATUSES.includes(order.status);
     const hasDigitalItem = order.items.some((item) => item.is_digital);
     const hasPhysicalItem = order.items.some((item) => !item.is_digital);
+    const isMono = style === 'ledger';
 
     return (
         <>
@@ -89,93 +100,113 @@ export default function CheckoutReturn({
 
             <MetaPixel event={metaPixel} />
 
-            <main className="mx-auto max-w-xl space-y-8 px-4 py-12 text-center">
-                <div>
-                    <h1 className="text-2xl font-bold">
-                        Terima kasih atas pesananmu!
-                    </h1>
-                    <p className="mt-2 text-muted-foreground">
-                        {order.status === 'paid'
-                            ? (thankYouMessage ?? statusMessage[order.status])
-                            : statusMessage[order.status]}
-                    </p>
-                </div>
-
-                <div className="rounded-lg border p-6 text-left">
-                    <div className="mb-4 flex items-center justify-between border-b pb-4">
-                        <span className="font-medium">Nomor Pesanan</span>
-                        <span className="font-mono">{order.order_number}</span>
+            <div className={`min-h-screen ${PAGE_BG_CLASS[style]}`}>
+                <main className="mx-auto max-w-xl space-y-6 px-4 py-12">
+                    <div className="text-center">
+                        <h1 className={HEADLINE_CLASS[style]}>
+                            Terima kasih atas pesananmu!
+                        </h1>
+                        <p className="mt-2 text-muted-foreground">
+                            {order.status === 'paid'
+                                ? (thankYouMessage ??
+                                  statusMessage[order.status])
+                                : statusMessage[order.status]}
+                        </p>
                     </div>
 
-                    <div className="mb-4 flex items-center justify-between">
-                        <span className="font-medium">Status</span>
-                        <Badge
-                            variant={statusVariant[order.status]}
-                            className="capitalize"
-                        >
-                            {order.status}
-                        </Badge>
-                    </div>
+                    {showNextSteps && (
+                        <OrderStatusTimeline
+                            status={order.status}
+                            style={style}
+                        />
+                    )}
 
-                    <div className="space-y-2">
-                        {order.items.map((item) => (
-                            <div
-                                key={item.id}
-                                className="flex items-center justify-between text-sm"
+                    <div className={CARD_CLASS[style]}>
+                        <div className="mb-4 flex items-center justify-between border-b pb-4">
+                            <span className="font-medium">Nomor Pesanan</span>
+                            <span className={isMono ? '' : 'font-mono'}>
+                                {order.order_number}
+                            </span>
+                        </div>
+
+                        <div className="mb-4 flex items-center justify-between">
+                            <span className="font-medium">Status</span>
+                            <Badge
+                                variant={statusVariant[order.status]}
+                                className="capitalize"
                             >
-                                <span>
-                                    {item.product_name} × {item.quantity}
-                                </span>
-                                <span>{formatPrice(item.unit_price)}</span>
-                            </div>
-                        ))}
+                                {order.status}
+                            </Badge>
+                        </div>
+
+                        <div className="space-y-2">
+                            {order.items.map((item) => (
+                                <div
+                                    key={item.id}
+                                    className="flex items-center justify-between text-sm"
+                                >
+                                    <span>
+                                        {item.product_name} × {item.quantity}
+                                    </span>
+                                    <span>{formatPrice(item.unit_price)}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="mt-4 flex items-center justify-between border-t pt-4 font-semibold">
+                            <span>Total</span>
+                            <span>{formatPrice(order.total)}</span>
+                        </div>
                     </div>
 
-                    <div className="mt-4 flex items-center justify-between border-t pt-4 font-semibold">
-                        <span>Total</span>
-                        <span>{formatPrice(order.total)}</span>
-                    </div>
-                </div>
+                    {showNextSteps && (
+                        <div
+                            className={`${CARD_CLASS[style]} bg-muted/30 text-left`}
+                        >
+                            <h2 className="font-semibold">
+                                Langkah Selanjutnya
+                            </h2>
 
-                {showNextSteps && (
-                    <div className="space-y-4 rounded-lg border bg-muted/30 p-6 text-left">
-                        <h2 className="font-semibold">Langkah Selanjutnya</h2>
+                            <div className="mt-4 space-y-4">
+                                {hasDigitalItem && (
+                                    <div className="flex gap-3 text-sm">
+                                        <Mail className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                                        <p>
+                                            Produk digital: cek email di{' '}
+                                            <span className="font-medium">
+                                                {customerEmail}
+                                            </span>{' '}
+                                            untuk link download, lisensi (jika
+                                            ada), dan instruksi akses. Link
+                                            berlaku 30 hari sejak dikirim.
+                                        </p>
+                                    </div>
+                                )}
 
-                        {hasDigitalItem && (
-                            <div className="flex gap-3 text-sm">
-                                <Mail className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                                <p>
-                                    Produk digital: cek email di{' '}
-                                    <span className="font-medium">
-                                        {customerEmail}
-                                    </span>{' '}
-                                    untuk link download, lisensi (jika ada), dan
-                                    instruksi akses. Link berlaku 30 hari sejak
-                                    dikirim.
-                                </p>
+                                {hasPhysicalItem && (
+                                    <div className="flex gap-3 text-sm">
+                                        <Package className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                                        <p>
+                                            Produk fisik: pesananmu sedang kami
+                                            siapkan. Nomor resi akan dikirim ke
+                                            email begitu paket dikirim.
+                                        </p>
+                                    </div>
+                                )}
                             </div>
-                        )}
+                        </div>
+                    )}
 
-                        {hasPhysicalItem && (
-                            <div className="flex gap-3 text-sm">
-                                <Package className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                                <p>
-                                    Produk fisik: pesananmu sedang kami siapkan.
-                                    Nomor resi akan dikirim ke email begitu
-                                    paket dikirim.
-                                </p>
-                            </div>
-                        )}
+                    <div className="text-center">
+                        <Link
+                            href={orderLookupUrl}
+                            className={SECONDARY_BUTTON_CLASS[style]}
+                        >
+                            Cek Status Pesanan
+                        </Link>
                     </div>
-                )}
-
-                <Link
-                    href={orderLookupUrl}
-                    className="inline-flex items-center justify-center rounded-md border px-6 py-2.5 text-sm font-medium transition-colors hover:bg-muted"
-                >
-                    Cek Status Pesanan
-                </Link>
-            </main>
+                </main>
+            </div>
         </>
     );
 }

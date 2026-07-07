@@ -207,6 +207,26 @@ class PostPurchaseOfferTest extends TestCase
         $lookupResponse->assertInertia(fn ($page) => $page->component('public/order-lookup-result'));
     }
 
+    public function test_return_page_uses_the_funnels_salespage_style(): void
+    {
+        PaymentSetting::factory()->create();
+        $this->fakeDuitkuPaymentMethods();
+        $this->fakeDuitkuInquiry();
+
+        $product = Product::factory()->digital()->published()->create(['price' => 45000]);
+        $funnel = Funnel::factory()->published()->create(['product_id' => $product->id, 'slug' => 'kopi']);
+        Salespage::factory()->published()->create(['funnel_id' => $funnel->id, 'style' => 'ledger']);
+
+        $this->payAndConfirmMainOrder($funnel);
+
+        $response = $this->get("/f/{$funnel->slug}/checkout/kembali");
+
+        $response->assertInertia(fn ($page) => $page
+            ->component('public/checkout-return')
+            ->where('style', 'ledger')
+        );
+    }
+
     public function test_return_page_without_upsell_offers_finalizes_immediately(): void
     {
         PaymentSetting::factory()->create();

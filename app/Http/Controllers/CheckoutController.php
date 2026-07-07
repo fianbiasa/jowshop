@@ -11,6 +11,7 @@ use App\Enums\OfferTriggerCondition;
 use App\Enums\OrderItemType;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
+use App\Enums\SalespageStyle;
 use App\Exceptions\PaymentGatewayException;
 use App\Http\Requests\StoreCheckoutRequest;
 use App\Models\Customer;
@@ -254,6 +255,8 @@ class CheckoutController extends Controller
 
         $order = Order::query()->with(['items.product', 'customer'])->findOrFail($orderId);
 
+        $funnel->loadMissing('salespage');
+
         $session = $tracker->resolveSession($request, $funnel);
 
         $next = $this->nextPostPurchaseOffer($request, $funnel, $order);
@@ -286,6 +289,7 @@ class CheckoutController extends Controller
         return Inertia::render('public/checkout-return', [
             'metaPixel' => $this->metaPixelProp($this->effectivePixelId($funnel), $paymentSuccessEvent, $order),
             'funnel' => ['name' => $funnel->name],
+            'style' => $funnel->salespage?->style ?? SalespageStyle::Minimal,
             'order' => [
                 'order_number' => $order->order_number,
                 'status' => $order->status,

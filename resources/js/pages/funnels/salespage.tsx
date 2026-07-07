@@ -42,6 +42,7 @@ type Block = { type: string; data: BlockData };
 const blockLabels: Record<string, string> = {
     headline: 'Headline',
     subheadline: 'Subheadline',
+    paragraph: 'Paragraf',
     benefit_list: 'Daftar Benefit',
     testimonial: 'Testimoni',
     faq: 'FAQ',
@@ -58,6 +59,7 @@ function defaultDataForType(type: string): BlockData {
         case 'headline':
         case 'subheadline':
         case 'guarantee':
+        case 'paragraph':
             return { text: '' };
         case 'benefit_list':
             return { items: [] };
@@ -125,6 +127,15 @@ function BlockEditor({
                     placeholder="Teks..."
                 />
             );
+        case 'paragraph':
+            return (
+                <Textarea
+                    value={(block.data.text as string) ?? ''}
+                    onChange={(e) => onChange({ text: e.target.value })}
+                    placeholder="Tulis paragraf di sini..."
+                    rows={4}
+                />
+            );
         case 'cta':
             return (
                 <Input
@@ -140,6 +151,15 @@ function BlockEditor({
                 <Textarea
                     value={items.join('\n')}
                     onChange={(e) =>
+                        // Split without dropping blank lines here — doing
+                        // so on every keystroke deletes the newline the
+                        // instant Enter is pressed (an empty line trims to
+                        // '' and gets filtered before you can type on it),
+                        // making Enter look like it does nothing. Truly
+                        // empty lines get cleaned up on blur instead.
+                        onChange({ items: e.target.value.split('\n') })
+                    }
+                    onBlur={(e) =>
                         onChange({
                             items: e.target.value
                                 .split('\n')
