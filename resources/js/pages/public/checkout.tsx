@@ -2,10 +2,12 @@ import { Head, useForm } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import InputError from '@/components/input-error';
 import MetaPixel from '@/components/meta-pixel';
+import SiteLogo from '@/components/site-logo';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import type { MetaPixelEvent } from '@/lib/meta-pixel';
+import { LOGO_WRAPPER_CLASS } from '@/lib/salespage-themes';
 import { store } from '@/routes/public/checkout';
 import { search as searchDestinations } from '@/routes/public/checkout/destinations';
 
@@ -114,6 +116,10 @@ export default function Checkout({
             <MetaPixel event={metaPixel} />
 
             <main className="mx-auto max-w-xl space-y-8 px-4 py-12">
+                <div className={LOGO_WRAPPER_CLASS.minimal}>
+                    <SiteLogo style="minimal" />
+                </div>
+
                 <div className="text-center">
                     <h1 className="text-2xl font-bold">Checkout</h1>
                     <p className="mt-1 text-muted-foreground">

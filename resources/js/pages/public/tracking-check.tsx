@@ -1,8 +1,10 @@
 import { Form, Head } from '@inertiajs/react';
 import InputError from '@/components/input-error';
+import SiteLogo from '@/components/site-logo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { LOGO_WRAPPER_CLASS } from '@/lib/salespage-themes';
 import { store } from '@/routes/tracking';
 
 type Tracking = {
@@ -22,6 +24,10 @@ export default function TrackingCheck({
             <Head title="Cek Resi" />
 
             <main className="mx-auto max-w-lg space-y-6 px-4 py-12">
+                <div className={LOGO_WRAPPER_CLASS.minimal}>
+                    <SiteLogo style="minimal" />
+                </div>
+
                 <div>
                     <h1 className="text-2xl font-bold">Cek Resi</h1>
                     <p className="text-sm text-muted-foreground">

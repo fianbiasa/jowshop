@@ -1,10 +1,12 @@
 import { Form, Head } from '@inertiajs/react';
 import { useState } from 'react';
+import SiteLogo from '@/components/site-logo';
 import { trackMetaPixelEvent } from '@/lib/meta-pixel';
 import {
     CTA_BUTTON_CLASS,
     HEADLINE_CLASS,
     KICKER_CLASS,
+    LOGO_WRAPPER_CLASS,
     MAIN_CLASS,
     OFFER_CARD_CLASS,
     PAGE_BG_CLASS,
@@ -56,6 +58,10 @@ export default function CheckoutUpsell({
 
             <div className={`min-h-screen ${PAGE_BG_CLASS[style]}`}>
                 <main className={MAIN_CLASS[style]}>
+                    <div className={LOGO_WRAPPER_CLASS[style]}>
+                        <SiteLogo style={style} />
+                    </div>
+
                     <div>
                         <p className={KICKER_CLASS[style]}>{eyebrow}</p>
                         <h1 className={`mt-2 ${HEADLINE_CLASS[style]}`}>

@@ -1,6 +1,7 @@
 import { Form, Head } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import InputError from '@/components/input-error';
+import SiteLogo from '@/components/site-logo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +12,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { LOGO_WRAPPER_CLASS } from '@/lib/salespage-themes';
 import {
     destinations as searchDestinations,
     store,
@@ -92,6 +94,10 @@ export default function ShippingEstimate({
             <Head title="Cek Ongkir" />
 
             <main className="mx-auto max-w-lg space-y-6 px-4 py-12">
+                <div className={LOGO_WRAPPER_CLASS.minimal}>
+                    <SiteLogo style="minimal" />
+                </div>
+
                 <div>
                     <h1 className="text-2xl font-bold">Cek Ongkir</h1>
                     <p className="text-sm text-muted-foreground">

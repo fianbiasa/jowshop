@@ -1,6 +1,8 @@
 import { Form, Head } from '@inertiajs/react';
 import { useState } from 'react';
 import InputError from '@/components/input-error';
+import SiteLogo from '@/components/site-logo';
+import { LOGO_WRAPPER_CLASS } from '@/lib/salespage-themes';
 import { store } from '@/routes/public/checkout/pay';
 
 const priceFormatter = new Intl.NumberFormat('id-ID', {
@@ -34,6 +36,10 @@ export default function CheckoutPayment({
             <Head title={`Pilih Pembayaran — ${funnel.name}`} />
 
             <main className="mx-auto max-w-xl space-y-6 px-4 py-12">
+                <div className={LOGO_WRAPPER_CLASS.minimal}>
+                    <SiteLogo style="minimal" />
+                </div>
+
                 <div className="text-center">
                     <h1 className="text-2xl font-bold">
                         Pilih Metode Pembayaran

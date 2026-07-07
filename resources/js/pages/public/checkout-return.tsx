@@ -2,11 +2,13 @@ import { Head, Link } from '@inertiajs/react';
 import { Mail, Package } from 'lucide-react';
 import MetaPixel from '@/components/meta-pixel';
 import OrderStatusTimeline from '@/components/order-status-timeline';
+import SiteLogo from '@/components/site-logo';
 import { Badge } from '@/components/ui/badge';
 import type { MetaPixelEvent } from '@/lib/meta-pixel';
 import {
     CARD_CLASS,
     HEADLINE_CLASS,
+    LOGO_WRAPPER_CLASS,
     PAGE_BG_CLASS,
     SECONDARY_BUTTON_CLASS,
 } from '@/lib/salespage-themes';
@@ -102,6 +104,10 @@ export default function CheckoutReturn({
 
             <div className={`min-h-screen ${PAGE_BG_CLASS[style]}`}>
                 <main className="mx-auto max-w-xl space-y-6 px-4 py-12">
+                    <div className={LOGO_WRAPPER_CLASS[style]}>
+                        <SiteLogo style={style} />
+                    </div>
+
                     <div className="text-center">
                         <h1 className={HEADLINE_CLASS[style]}>
                             Terima kasih atas pesananmu!

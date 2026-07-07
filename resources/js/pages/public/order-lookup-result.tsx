@@ -1,10 +1,12 @@
 import { Head } from '@inertiajs/react';
 import OrderStatusTimeline from '@/components/order-status-timeline';
+import SiteLogo from '@/components/site-logo';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     CARD_CLASS,
     CTA_BUTTON_CLASS,
+    LOGO_WRAPPER_CLASS,
     PAGE_BG_CLASS,
 } from '@/lib/salespage-themes';
 import type { SalespageStyle as Style } from '@/types/models';
@@ -78,6 +80,10 @@ export default function OrderLookupResult({
 
             <div className={`min-h-screen ${PAGE_BG_CLASS[style]}`}>
                 <main className="mx-auto max-w-xl space-y-6 px-4 py-12">
+                    <div className={LOGO_WRAPPER_CLASS[style]}>
+                        <SiteLogo style={style} />
+                    </div>
+
                     <div className="flex items-center justify-between">
                         <h1 className={TITLE_CLASS[style]}>
                             Pesanan {order.order_number}

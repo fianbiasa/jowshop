@@ -1,5 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { BarChart3, CreditCard, GitBranch, Sparkles } from 'lucide-react';
+import SiteLogo from '@/components/site-logo';
 import { Button } from '@/components/ui/button';
 import { dashboard, login } from '@/routes';
 import { create as orderLookupCreate } from '@/routes/order-lookup';
@@ -67,13 +68,8 @@ export default function Welcome() {
                 </div>
 
                 <header className="mx-auto flex w-full max-w-5xl items-center justify-between p-6">
-                    <div className="flex items-center gap-2 font-semibold">
-                        <img
-                            src="/favicon.svg"
-                            alt="Jowshop"
-                            className="h-8 w-8"
-                        />
-                        Jowshop
+                    <div className="font-semibold">
+                        <SiteLogo style="minimal" />
                     </div>
 
                     <nav className="flex items-center gap-3">

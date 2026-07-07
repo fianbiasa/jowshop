@@ -135,3 +135,30 @@ export const SPACER_HEIGHT_CLASS: Record<string, string> = {
     md: 'h-8',
     lg: 'h-16',
 };
+
+/**
+ * The site logo (components/site-logo.tsx), shown at the top of every
+ * public page. Only size/position/companion-text vary per style — never a
+ * filter/tint on the uploaded image itself, so an admin's real brand
+ * colors always come through unaltered.
+ */
+export const LOGO_WRAPPER_CLASS: Record<Style, string> = {
+    minimal: 'mb-6 flex items-center justify-center',
+    bold: 'mb-6 flex items-center justify-start',
+    editorial: 'mb-8 flex items-center justify-center',
+    ledger: 'mb-6 flex items-center justify-start border-b border-dashed border-stone-300 pb-4',
+};
+
+export const LOGO_IMG_CLASS: Record<Style, string> = {
+    minimal: 'h-8 w-auto',
+    bold: 'h-10 w-auto',
+    editorial: 'h-6 w-auto',
+    ledger: 'h-7 w-auto',
+};
+
+export const LOGO_TEXT_CLASS: Record<Style, string> = {
+    minimal: 'text-lg font-semibold',
+    bold: 'text-xl font-extrabold text-stone-900',
+    editorial: 'font-serif text-lg font-medium tracking-wide text-stone-700',
+    ledger: 'font-mono text-base font-bold text-stone-900',
+};

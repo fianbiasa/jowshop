@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import MetaPixel from '@/components/meta-pixel';
+import SiteLogo from '@/components/site-logo';
 import type { MetaPixelEvent } from '@/lib/meta-pixel';
 import {
     ASPECT_RATIO_CLASS,
@@ -8,6 +9,7 @@ import {
     GUARANTEE_CLASS,
     HEADLINE_CLASS,
     KICKER_CLASS,
+    LOGO_WRAPPER_CLASS,
     MAIN_CLASS,
     PAGE_BG_CLASS,
     PARAGRAPH_CLASS,
@@ -521,6 +523,10 @@ export default function PublicSalespage({
 
             <div className={`min-h-screen ${PAGE_BG_CLASS[style]}`}>
                 <main className={MAIN_CLASS[style]}>
+                    <div className={LOGO_WRAPPER_CLASS[style]}>
+                        <SiteLogo style={style} />
+                    </div>
+
                     <div className={KICKER_CLASS[style]}>
                         {product.name} · {formatPrice(product.price)}
                     </div>

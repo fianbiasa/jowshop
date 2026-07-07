@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\BrandingSetting;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -51,6 +52,10 @@ class HandleInertiaRequests extends Middleware
                 'user' => $requiresAuth ? $request->user() : null,
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'branding' => [
+                'logoUrl' => BrandingSetting::query()->first()?->logoUrl(),
+                'siteName' => config('app.name'),
+            ],
         ];
     }
 }

@@ -1,6 +1,8 @@
 import { Head } from '@inertiajs/react';
+import SiteLogo from '@/components/site-logo';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { LOGO_WRAPPER_CLASS } from '@/lib/salespage-themes';
 
 type Asset = {
     id: number;
@@ -37,6 +39,10 @@ export default function DigitalDownload({
             <Head title={`Unduh — ${productName}`} />
 
             <main className="mx-auto max-w-xl space-y-6 px-4 py-12">
+                <div className={LOGO_WRAPPER_CLASS.minimal}>
+                    <SiteLogo style="minimal" />
+                </div>
+
                 <div>
                     <h1 className="text-2xl font-bold">{productName}</h1>
                     <p className="text-sm text-muted-foreground">
