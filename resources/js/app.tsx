@@ -2,6 +2,7 @@ import { createInertiaApp } from '@inertiajs/react';
 import { lazy, Suspense } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { resolveLayout } from '@/lib/resolve-layout';
 
 // Lazy-loaded so the admin sidebar/nav (and everything it pulls in) isn't
 // bundled into the shared entry chunk every visitor downloads — public
@@ -15,22 +16,8 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
-    layout: (name) => {
-        switch (true) {
-            case name === 'welcome':
-                return null;
-            case name.startsWith('public/'):
-                return null;
-            case name.startsWith('legal/'):
-                return null;
-            case name.startsWith('auth/'):
-                return AuthLayout;
-            case name.startsWith('settings/'):
-                return [AppLayout, SettingsLayout];
-            default:
-                return AppLayout;
-        }
-    },
+    layout: (name) =>
+        resolveLayout(name, { AppLayout, AuthLayout, SettingsLayout }),
     strictMode: true,
     withApp(app) {
         return (

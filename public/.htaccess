@@ -23,3 +23,17 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# Vite build output (/build/**) and uploaded media (/storage/**) are both
+# served under content-hashed/UUID filenames that never get overwritten in
+# place — a new deploy or upload always produces a new filename — so it's
+# safe to tell browsers to cache them for a full year without revalidating.
+# Without this, PageSpeed/Lighthouse flags "serve static assets with an
+# efficient cache policy" and every repeat visit re-downloads unchanged JS/
+# CSS/images. Scoped to these two paths only (not favicon.ico etc., which
+# aren't hashed and could change without a new filename).
+<IfModule mod_headers.c>
+    <If "%{REQUEST_URI} =~ m#^/(build|storage)/#">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </If>
+</IfModule>
