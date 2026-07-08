@@ -27,8 +27,8 @@ return new class extends Migration
             $table->string('fbp')->nullable();
             $table->string('fbc')->nullable();
             $table->foreignId('customer_id')->nullable()->constrained()->nullOnDelete();
-            $table->timestamp('first_seen_at');
-            $table->timestamp('last_seen_at');
+            $table->timestamp('first_seen_at')->useCurrent();
+            $table->timestamp('last_seen_at')->useCurrent();
             $table->timestamps();
         });
     }
