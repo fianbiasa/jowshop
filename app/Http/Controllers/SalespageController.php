@@ -9,6 +9,7 @@ use App\Http\Requests\GenerateSalespageRequest;
 use App\Http\Requests\UpdateSalespageRequest;
 use App\Models\AiProviderSetting;
 use App\Models\Funnel;
+use App\Services\ImageOptimizer;
 use App\Support\ContentBlockSanitizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
@@ -38,10 +39,10 @@ class SalespageController extends Controller
     /**
      * Manually update the salespage content.
      */
-    public function update(UpdateSalespageRequest $request, Funnel $funnel): RedirectResponse
+    public function update(UpdateSalespageRequest $request, Funnel $funnel, ImageOptimizer $imageOptimizer): RedirectResponse
     {
         $validated = $request->validated();
-        $content = $this->resolveMediaUploads($request, $validated['content']);
+        $content = $this->resolveMediaUploads($request, $validated['content'], $imageOptimizer);
 
         $funnel->salespage()->updateOrCreate([], [
             'title' => $validated['title'],
@@ -72,10 +73,15 @@ class SalespageController extends Controller
      * authoritative and drop every other sibling key under `data` (text,
      * items, url, ...) that has no rule of its own.
      *
+     * Image uploads are downscaled and re-encoded to WebP via ImageOptimizer
+     * before storing (a raw camera photo dropped into a salespage otherwise
+     * tanks Largest Contentful Paint); video uploads are stored as-is since
+     * GD can't transcode video.
+     *
      * @param  array<int, array<string, mixed>>  $content
      * @return array<int, array<string, mixed>>
      */
-    private function resolveMediaUploads(UpdateSalespageRequest $request, array $content): array
+    private function resolveMediaUploads(UpdateSalespageRequest $request, array $content, ImageOptimizer $imageOptimizer): array
     {
         $request->validate([
             'content.*.data.file' => ['nullable', 'file', 'max:51200'],
@@ -87,7 +93,12 @@ class SalespageController extends Controller
             }
 
             if ($request->hasFile("content.{$index}.data.file")) {
-                $path = $request->file("content.{$index}.data.file")->store('salespage-media', 'public');
+                $file = $request->file("content.{$index}.data.file");
+
+                $path = str_starts_with((string) $file->getMimeType(), 'image/')
+                    ? $imageOptimizer->store($file, 'salespage-media')
+                    : (string) $file->store('salespage-media', 'public');
+
                 $block['data']['url'] = Storage::disk('public')->url($path);
             }
 

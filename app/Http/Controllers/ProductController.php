@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Models\Product;
+use App\Services\ImageOptimizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -12,6 +13,8 @@ use Inertia\Response;
 
 class ProductController extends Controller
 {
+    private const THUMBNAIL_MAX_WIDTH = 800;
+
     /**
      * Display a listing of the resource.
      */
@@ -42,14 +45,18 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreProductRequest $request): RedirectResponse
+    public function store(StoreProductRequest $request, ImageOptimizer $imageOptimizer): RedirectResponse
     {
         $validated = $request->validated();
 
         unset($validated['thumbnail'], $validated['remove_thumbnail']);
 
         if ($request->hasFile('thumbnail')) {
-            $validated['thumbnail_path'] = $request->file('thumbnail')->store('products', 'public');
+            $validated['thumbnail_path'] = $imageOptimizer->store(
+                $request->file('thumbnail'),
+                'products',
+                self::THUMBNAIL_MAX_WIDTH,
+            );
         }
 
         $request->user()->products()->create($validated);
@@ -76,7 +83,7 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateProductRequest $request, Product $product): RedirectResponse
+    public function update(UpdateProductRequest $request, Product $product, ImageOptimizer $imageOptimizer): RedirectResponse
     {
         $validated = $request->validated();
 
@@ -86,7 +93,7 @@ class ProductController extends Controller
             }
 
             $validated['thumbnail_path'] = $request->hasFile('thumbnail')
-                ? $request->file('thumbnail')->store('products', 'public')
+                ? $imageOptimizer->store($request->file('thumbnail'), 'products', self::THUMBNAIL_MAX_WIDTH)
                 : null;
         }
 

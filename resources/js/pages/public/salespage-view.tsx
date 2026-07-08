@@ -272,10 +272,12 @@ function ImageBlock({
     url,
     alt,
     aspectRatio,
+    isPriority,
 }: {
     url: string;
     alt: string;
     aspectRatio: string | null;
+    isPriority: boolean;
 }) {
     if (!url) {
         return null;
@@ -291,6 +293,8 @@ function ImageBlock({
                 src={url}
                 alt={alt}
                 className={`h-full w-full ${ratioClass ? 'object-cover' : ''}`}
+                loading={isPriority ? 'eager' : 'lazy'}
+                fetchPriority={isPriority ? 'high' : 'auto'}
             />
         </div>
     );
@@ -374,10 +378,12 @@ function BlockRenderer({
     block,
     funnelSlug,
     style,
+    isPriorityImage,
 }: {
     block: Block;
     funnelSlug: string;
     style: Style;
+    isPriorityImage: boolean;
 }) {
     switch (block.type) {
         case 'headline':
@@ -459,7 +465,12 @@ function BlockRenderer({
             };
 
             return (
-                <ImageBlock url={url} alt={alt} aspectRatio={aspect_ratio} />
+                <ImageBlock
+                    url={url}
+                    alt={alt}
+                    aspectRatio={aspect_ratio}
+                    isPriority={isPriorityImage}
+                />
             );
         }
         case 'video': {
@@ -507,6 +518,9 @@ export default function PublicSalespage({
     metaPixel: MetaPixelEvent | null;
 }) {
     const style = salespage.style;
+    const firstImageIndex = salespage.content.findIndex(
+        (block) => block.type === 'image',
+    );
 
     return (
         <>
@@ -537,6 +551,7 @@ export default function PublicSalespage({
                             block={block}
                             funnelSlug={funnel.slug}
                             style={style}
+                            isPriorityImage={i === firstImageIndex}
                         />
                     ))}
                 </main>

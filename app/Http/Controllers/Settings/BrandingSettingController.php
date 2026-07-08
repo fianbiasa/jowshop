@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\UpdateBrandingSettingRequest;
 use App\Models\BrandingSetting;
+use App\Services\ImageOptimizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -12,6 +13,8 @@ use Inertia\Response;
 
 class BrandingSettingController extends Controller
 {
+    private const LOGO_MAX_WIDTH = 600;
+
     /**
      * Show the site branding (logo & contact info) settings page.
      */
@@ -32,7 +35,7 @@ class BrandingSettingController extends Controller
      * The logo fields and contact fields are submitted from separate forms,
      * so each is only touched when actually present on the request.
      */
-    public function update(UpdateBrandingSettingRequest $request): RedirectResponse
+    public function update(UpdateBrandingSettingRequest $request, ImageOptimizer $imageOptimizer): RedirectResponse
     {
         $validated = $request->validated();
 
@@ -44,7 +47,7 @@ class BrandingSettingController extends Controller
             }
 
             $setting->logo_path = $request->hasFile('logo')
-                ? $request->file('logo')->store('branding', 'public')
+                ? $imageOptimizer->store($request->file('logo'), 'branding', self::LOGO_MAX_WIDTH)
                 : null;
         }
 
