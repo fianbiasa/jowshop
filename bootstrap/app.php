@@ -1,6 +1,7 @@
 <?php
 
 use App\Console\Commands\SendPaymentReminders;
+use App\Http\Middleware\ApplyCdnSettings;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: ['webhooks/duitku']);
 
         $middleware->web(append: [
+            ApplyCdnSettings::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);

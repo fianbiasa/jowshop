@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Settings\AiProviderSettingController;
 use App\Http\Controllers\Settings\BrandingSettingController;
+use App\Http\Controllers\Settings\CdnSettingController;
 use App\Http\Controllers\Settings\MetaCapiSettingController;
 use App\Http\Controllers\Settings\PaymentSettingController;
 use App\Http\Controllers\Settings\ProfileController;
@@ -43,6 +44,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('settings/branding', [BrandingSettingController::class, 'edit'])->name('branding-settings.edit');
     Route::put('settings/branding', [BrandingSettingController::class, 'update'])->name('branding-settings.update');
+
+    Route::get('settings/cdn', [CdnSettingController::class, 'edit'])->name('cdn-settings.edit');
+    Route::put('settings/cdn', [CdnSettingController::class, 'update'])->name('cdn-settings.update');
 });
 
 Route::get('.well-known/passkey-endpoints', function () {

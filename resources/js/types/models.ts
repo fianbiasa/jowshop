@@ -43,6 +43,11 @@ export interface ShippingSettingSummary {
     is_configured: true;
 }
 
+export interface CdnSettingSummary {
+    pull_zone_url: string | null;
+    is_active: boolean;
+}
+
 export type ProductType = 'digital' | 'physical';
 
 export type ProductStatus = 'draft' | 'published' | 'archived';

@@ -7,6 +7,7 @@ import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn, toUrl } from '@/lib/utils';
 import { index as aiProvidersIndex } from '@/routes/ai-providers';
 import { edit as editBrandingSettings } from '@/routes/branding-settings';
+import { edit as editCdnSettings } from '@/routes/cdn-settings';
 import { edit as editMetaCapiSettings } from '@/routes/meta-capi-settings';
 import { edit as editPaymentSettings } from '@/routes/payment-settings';
 import { edit } from '@/routes/profile';
@@ -48,6 +49,11 @@ const sidebarNavItems: NavItem[] = [
     {
         title: 'Branding',
         href: editBrandingSettings(),
+        icon: null,
+    },
+    {
+        title: 'CDN',
+        href: editCdnSettings(),
         icon: null,
     },
 ];
