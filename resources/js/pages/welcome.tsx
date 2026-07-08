@@ -3,6 +3,7 @@ import { BarChart3, CreditCard, GitBranch, Sparkles } from 'lucide-react';
 import SiteLogo from '@/components/site-logo';
 import { Button } from '@/components/ui/button';
 import { dashboard, login } from '@/routes';
+import legal from '@/routes/legal';
 import { create as orderLookupCreate } from '@/routes/order-lookup';
 import { create as shippingEstimateCreate } from '@/routes/shipping-estimate';
 import { create as trackingCreate } from '@/routes/tracking';
@@ -11,6 +12,12 @@ const customerLinks = [
     { label: 'Cek Pesanan', href: orderLookupCreate() },
     { label: 'Cek Ongkir', href: shippingEstimateCreate() },
     { label: 'Resi', href: trackingCreate() },
+];
+
+const footerLinks = [
+    { label: 'Syarat & Ketentuan', href: legal.terms() },
+    { label: 'Kebijakan Privasi', href: legal.privacy() },
+    { label: 'Kontak', href: legal.contact() },
 ];
 
 const features = [
@@ -41,14 +48,14 @@ const features = [
 ];
 
 export default function Welcome() {
-    const { auth } = usePage().props;
+    const { auth, branding } = usePage().props;
 
     return (
         <>
-            <Head title="Jowshop — Platform Sales Funnel">
+            <Head title={`${branding.siteName} — Platform Sales Funnel`}>
                 <meta
                     name="description"
-                    content="Jowshop membantu kamu menyusun salespage, checkout, order bump, upsell, dan downsell dalam satu funnel penjualan — lengkap dengan dashboard analitik dan pembayaran terintegrasi."
+                    content={`${branding.siteName} membantu kamu menyusun salespage, checkout, order bump, upsell, dan downsell dalam satu funnel penjualan — lengkap dengan dashboard analitik dan pembayaran terintegrasi.`}
                 />
             </Head>
 
@@ -128,8 +135,21 @@ export default function Welcome() {
                     </div>
                 </main>
 
-                <footer className="border-t p-6 text-center text-sm text-muted-foreground">
-                    &copy; {new Date().getFullYear()} Jowshop
+                <footer className="border-t p-6">
+                    <nav className="flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground">
+                        {footerLinks.map((link) => (
+                            <Link
+                                key={link.label}
+                                href={link.href}
+                                className="hover:text-foreground hover:underline"
+                            >
+                                {link.label}
+                            </Link>
+                        ))}
+                    </nav>
+                    <p className="mt-4 text-center text-sm text-muted-foreground">
+                        &copy; {new Date().getFullYear()} {branding.siteName}
+                    </p>
                 </footer>
             </div>
         </>
