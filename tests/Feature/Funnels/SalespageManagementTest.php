@@ -256,6 +256,34 @@ class SalespageManagementTest extends TestCase
         ]);
     }
 
+    public function test_salespage_can_be_generated_by_ai_for_every_style(): void
+    {
+        Http::fake([
+            'api.openai.com/*' => Http::response([
+                'choices' => [
+                    ['message' => ['content' => json_encode([
+                        ['type' => 'headline', 'data' => ['text' => 'Kopi Terbaik di Kota']],
+                    ])]],
+                ],
+                'usage' => ['prompt_tokens' => 120, 'completion_tokens' => 40],
+            ], 200),
+        ]);
+
+        foreach (SalespageStyle::cases() as $style) {
+            $user = User::factory()->create();
+            $funnel = Funnel::factory()->for($user, 'creator')->create();
+            $setting = AiProviderSetting::factory()->for($user, 'creator')->create();
+
+            $response = $this->actingAs($user)->post(route('funnels.salespage.generate', $funnel), [
+                'ai_provider_setting_id' => $setting->id,
+                'style' => $style->value,
+            ]);
+
+            $response->assertSessionHasNoErrors();
+            $response->assertRedirect(route('funnels.salespage.edit', $funnel));
+        }
+    }
+
     public function test_ai_generation_failure_is_logged_and_does_not_overwrite_salespage(): void
     {
         Http::fake([

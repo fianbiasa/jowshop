@@ -99,6 +99,7 @@ class GenerateSalespageContent
             SalespageStyle::Bold => 'Gaya tulisan: mendesak dan penuh urgency/scarcity, kalimat pendek dan tegas, cocok untuk penawaran terbatas.',
             SalespageStyle::Editorial => 'Gaya tulisan: storytelling naratif yang lebih panjang, mengalir seperti artikel, cocok untuk produk edukasi/kelas.',
             SalespageStyle::Minimal => 'Gaya tulisan: singkat, padat, langsung ke inti, tanpa basa-basi berlebihan.',
+            SalespageStyle::Ledger => 'Gaya tulisan: lugas dan transparan seperti nota/kwitansi, tekankan rincian harga dan bukti/jaminan, minim gimmick.',
         };
     }
 
