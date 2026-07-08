@@ -1,10 +1,11 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { BarChart3, CreditCard, GitBranch, Sparkles } from 'lucide-react';
+import { PackageOpen } from 'lucide-react';
 import SiteLogo from '@/components/site-logo';
 import { Button } from '@/components/ui/button';
 import { dashboard, login } from '@/routes';
 import legal from '@/routes/legal';
 import { create as orderLookupCreate } from '@/routes/order-lookup';
+import { show as salespageShow } from '@/routes/public/salespage';
 import { create as shippingEstimateCreate } from '@/routes/shipping-estimate';
 import { create as trackingCreate } from '@/routes/tracking';
 
@@ -20,42 +21,28 @@ const footerLinks = [
     { label: 'Kontak', href: legal.contact() },
 ];
 
-const features = [
-    {
-        icon: Sparkles,
-        title: 'Salespage dengan AI',
-        description:
-            'Pilih style, kasih brief singkat, biarkan AI yang tulis copy salespage-nya.',
-    },
-    {
-        icon: GitBranch,
-        title: 'Order Bump, Upsell & Downsell',
-        description:
-            'Susun funnel penjualan lengkap untuk memaksimalkan nilai tiap transaksi.',
-    },
-    {
-        icon: CreditCard,
-        title: 'Checkout & Pembayaran',
-        description:
-            'Checkout siap pakai dengan integrasi pembayaran Duitku, termasuk pengiriman.',
-    },
-    {
-        icon: BarChart3,
-        title: 'Dashboard Analitik',
-        description:
-            'Pantau kunjungan, konversi tiap langkah funnel, dan revenue secara real-time.',
-    },
-];
+const priceFormatter = new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    maximumFractionDigits: 0,
+});
 
-export default function Welcome() {
+type FunnelListing = {
+    name: string;
+    slug: string;
+    price: string;
+    thumbnailUrl: string | null;
+};
+
+export default function Welcome({ funnels }: { funnels: FunnelListing[] }) {
     const { auth, branding } = usePage().props;
 
     return (
         <>
-            <Head title={`${branding.siteName} — Platform Sales Funnel`}>
+            <Head title={branding.siteName}>
                 <meta
                     name="description"
-                    content={`${branding.siteName} membantu kamu menyusun salespage, checkout, order bump, upsell, dan downsell dalam satu funnel penjualan — lengkap dengan dashboard analitik dan pembayaran terintegrasi.`}
+                    content={`${branding.siteName} — belanja produk pilihan kami secara online.`}
                 />
             </Head>
 
@@ -92,47 +79,63 @@ export default function Welcome() {
                     </nav>
                 </header>
 
-                <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center gap-16 px-6 py-16 text-center">
-                    <div className="space-y-6">
-                        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-                            Bangun Funnel Penjualan yang Benar-Benar Mengonversi
+                <main className="mx-auto w-full max-w-5xl flex-1 space-y-10 px-6 py-12">
+                    <div className="space-y-2 text-center">
+                        <h1 className="text-3xl font-bold tracking-tight">
+                            {branding.siteName}
                         </h1>
-                        <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-                            Jowshop membantu kamu menyusun salespage, checkout,
-                            order bump, upsell/downsell, sampai pembayaran —
-                            dalam satu funnel yang siap pakai.
+                        <p className="mx-auto max-w-xl text-muted-foreground">
+                            Belanja produk pilihan kami secara online. Cek
+                            koleksi produk kami di bawah ini.
                         </p>
-                        <div className="flex items-center justify-center gap-3">
-                            {auth.check ? (
-                                <Button size="lg" asChild>
-                                    <Link href={dashboard()}>
-                                        Buka Dashboard
-                                    </Link>
-                                </Button>
-                            ) : (
-                                <Button size="lg" asChild>
-                                    <Link href={login()}>Masuk</Link>
-                                </Button>
-                            )}
-                        </div>
                     </div>
 
-                    <div className="grid w-full gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        {features.map((feature) => (
-                            <div
-                                key={feature.title}
-                                className="flex flex-col items-center gap-3 rounded-lg border p-6 text-center"
-                            >
-                                <feature.icon className="size-6 text-primary" />
-                                <div className="font-medium">
-                                    {feature.title}
+                    {funnels.length > 0 ? (
+                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                            {funnels.map((funnel) => (
+                                <div
+                                    key={funnel.slug}
+                                    className="flex flex-col overflow-hidden rounded-lg border"
+                                >
+                                    <div className="aspect-square w-full bg-muted">
+                                        {funnel.thumbnailUrl && (
+                                            <img
+                                                src={funnel.thumbnailUrl}
+                                                alt={funnel.name}
+                                                className="h-full w-full object-cover"
+                                            />
+                                        )}
+                                    </div>
+                                    <div className="flex flex-1 flex-col gap-3 p-4">
+                                        <div className="flex-1 space-y-1">
+                                            <h2 className="font-medium">
+                                                {funnel.name}
+                                            </h2>
+                                            <p className="text-sm text-muted-foreground">
+                                                {priceFormatter.format(
+                                                    Number(funnel.price),
+                                                )}
+                                            </p>
+                                        </div>
+                                        <Button asChild>
+                                            <Link
+                                                href={salespageShow(
+                                                    funnel.slug,
+                                                )}
+                                            >
+                                                Lihat Produk
+                                            </Link>
+                                        </Button>
+                                    </div>
                                 </div>
-                                <p className="text-sm text-muted-foreground">
-                                    {feature.description}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed p-12 text-center text-muted-foreground">
+                            <PackageOpen className="size-8" />
+                            <p>Belum ada produk yang dipublikasikan.</p>
+                        </div>
+                    )}
                 </main>
 
                 <footer className="border-t p-6">

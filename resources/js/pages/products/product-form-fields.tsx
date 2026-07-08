@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import InputError from '@/components/input-error';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -24,8 +26,59 @@ export default function ProductFormFields({
     type: 'digital' | 'physical';
     onTypeChange: (type: 'digital' | 'physical') => void;
 }) {
+    const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
+        null,
+    );
+    const [removeThumbnail, setRemoveThumbnail] = useState(false);
+
     return (
         <>
+            <div className="grid gap-2">
+                <Label htmlFor="thumbnail">Thumbnail</Label>
+                {!removeThumbnail &&
+                    (thumbnailPreview ?? product?.thumbnail_url) && (
+                        <img
+                            src={thumbnailPreview ?? product?.thumbnail_url ?? ''}
+                            alt="Thumbnail produk"
+                            className="h-32 w-32 rounded-md border object-cover"
+                        />
+                    )}
+                <Input
+                    id="thumbnail"
+                    name="thumbnail"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        setThumbnailPreview(
+                            file ? URL.createObjectURL(file) : null,
+                        );
+
+                        if (file) {
+                            setRemoveThumbnail(false);
+                        }
+                    }}
+                />
+                <InputError message={errors.thumbnail} />
+                <p className="text-xs text-muted-foreground">
+                    Ditampilkan sebagai gambar produk di halaman utama & katalog.
+                </p>
+
+                {product?.thumbnail_url && (
+                    <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Checkbox
+                            id="remove_thumbnail"
+                            name="remove_thumbnail"
+                            checked={removeThumbnail}
+                            onCheckedChange={(checked) =>
+                                setRemoveThumbnail(checked === true)
+                            }
+                        />
+                        Hapus thumbnail saat ini
+                    </label>
+                )}
+            </div>
+
             <div className="grid gap-6 md:grid-cols-2">
                 <div className="grid gap-2">
                     <Label htmlFor="name">Nama Produk</Label>

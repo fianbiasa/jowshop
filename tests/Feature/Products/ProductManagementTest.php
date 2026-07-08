@@ -7,6 +7,8 @@ use App\Enums\ProductType;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ProductManagementTest extends TestCase
@@ -128,6 +130,79 @@ class ProductManagementTest extends TestCase
 
         $this->assertSame('Nama Baru', $product->fresh()->name);
         $this->assertSame(ProductStatus::Published, $product->fresh()->status);
+    }
+
+    public function test_product_can_be_created_with_a_thumbnail(): void
+    {
+        Storage::fake('public');
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->post(route('products.store'), [
+            'name' => 'Kopi Robusta 200gr',
+            'slug' => 'kopi-robusta-200gr',
+            'type' => ProductType::Digital->value,
+            'price' => 45000,
+            'status' => ProductStatus::Draft->value,
+            'thumbnail' => UploadedFile::fake()->image('thumbnail.png'),
+        ]);
+
+        $response->assertSessionHasNoErrors();
+
+        $product = Product::query()->where('slug', 'kopi-robusta-200gr')->firstOrFail();
+        $this->assertNotNull($product->thumbnail_path);
+        Storage::disk('public')->assertExists($product->thumbnail_path);
+        $this->assertNotNull($product->thumbnail_url);
+    }
+
+    public function test_uploading_a_replacement_thumbnail_deletes_the_old_file(): void
+    {
+        Storage::fake('public');
+        $user = User::factory()->create();
+        $product = Product::factory()->digital()->for($user, 'creator')->create([
+            'thumbnail_path' => 'products/original.png',
+        ]);
+        Storage::disk('public')->put('products/original.png', 'fake-image-content');
+
+        $response = $this->actingAs($user)->put(route('products.update', $product), [
+            'name' => $product->name,
+            'slug' => $product->slug,
+            'type' => ProductType::Digital->value,
+            'price' => $product->price,
+            'status' => ProductStatus::Draft->value,
+            'thumbnail' => UploadedFile::fake()->image('replacement.png'),
+        ]);
+
+        $response->assertSessionHasNoErrors();
+
+        $product->refresh();
+        $this->assertNotSame('products/original.png', $product->thumbnail_path);
+        Storage::disk('public')->assertMissing('products/original.png');
+        Storage::disk('public')->assertExists($product->thumbnail_path);
+    }
+
+    public function test_remove_thumbnail_clears_the_thumbnail_path(): void
+    {
+        Storage::fake('public');
+        $user = User::factory()->create();
+        $product = Product::factory()->digital()->for($user, 'creator')->create([
+            'thumbnail_path' => 'products/original.png',
+        ]);
+        Storage::disk('public')->put('products/original.png', 'fake-image-content');
+
+        $response = $this->actingAs($user)->put(route('products.update', $product), [
+            'name' => $product->name,
+            'slug' => $product->slug,
+            'type' => ProductType::Digital->value,
+            'price' => $product->price,
+            'status' => ProductStatus::Draft->value,
+            'remove_thumbnail' => 1,
+        ]);
+
+        $response->assertSessionHasNoErrors();
+
+        $product->refresh();
+        $this->assertNull($product->thumbnail_path);
+        Storage::disk('public')->assertMissing('products/original.png');
     }
 
     public function test_product_can_be_deleted(): void

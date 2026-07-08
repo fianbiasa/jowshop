@@ -5,12 +5,15 @@ namespace App\Models;
 use App\Enums\ProductStatus;
 use App\Enums\ProductType;
 use Database\Factories\ProductFactory;
+use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @property int $id
@@ -30,6 +33,7 @@ use Illuminate\Support\Carbon;
  * @property int|null $stock
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property-read string|null $thumbnail_url
  */
 #[Fillable([
     'name',
@@ -46,6 +50,7 @@ use Illuminate\Support\Carbon;
     'height_cm',
     'stock',
 ])]
+#[Appends(['thumbnail_url'])]
 class Product extends Model
 {
     /** @use HasFactory<ProductFactory> */
@@ -66,6 +71,15 @@ class Product extends Model
             'width_cm' => 'decimal:2',
             'height_cm' => 'decimal:2',
         ];
+    }
+
+    protected function thumbnailUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): ?string => $this->thumbnail_path !== null
+                ? Storage::disk('public')->url($this->thumbnail_path)
+                : null,
+        );
     }
 
     /**

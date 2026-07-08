@@ -31,6 +31,8 @@ trait ProductValidationRules
             'type' => ['required', Rule::enum(ProductType::class)],
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
+            'thumbnail' => ['nullable', 'image', 'max:2048'],
+            'remove_thumbnail' => ['boolean'],
             'sku' => ['nullable', 'string', 'max:255'],
             'status' => ['required', Rule::enum(ProductStatus::class)],
             'weight_grams' => ['required_if:type,'.ProductType::Physical->value, 'nullable', 'integer', 'min:1'],

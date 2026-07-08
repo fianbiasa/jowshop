@@ -65,6 +65,7 @@ export interface Product {
     description: string | null;
     price: string;
     thumbnail_path: string | null;
+    thumbnail_url: string | null;
     sku: string | null;
     status: ProductStatus;
     weight_grams: number | null;

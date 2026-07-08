@@ -6,6 +6,7 @@ use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -43,7 +44,15 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request): RedirectResponse
     {
-        $request->user()->products()->create($request->validated());
+        $validated = $request->validated();
+
+        unset($validated['thumbnail'], $validated['remove_thumbnail']);
+
+        if ($request->hasFile('thumbnail')) {
+            $validated['thumbnail_path'] = $request->file('thumbnail')->store('products', 'public');
+        }
+
+        $request->user()->products()->create($validated);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Product created.')]);
 
@@ -69,7 +78,21 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, Product $product): RedirectResponse
     {
-        $product->update($request->validated());
+        $validated = $request->validated();
+
+        if ($request->hasFile('thumbnail') || ($validated['remove_thumbnail'] ?? false)) {
+            if ($product->thumbnail_path !== null) {
+                Storage::disk('public')->delete($product->thumbnail_path);
+            }
+
+            $validated['thumbnail_path'] = $request->hasFile('thumbnail')
+                ? $request->file('thumbnail')->store('products', 'public')
+                : null;
+        }
+
+        unset($validated['thumbnail'], $validated['remove_thumbnail']);
+
+        $product->update($validated);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Product updated.')]);
 

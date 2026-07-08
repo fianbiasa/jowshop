@@ -20,9 +20,10 @@ use App\Http\Controllers\ResumePaymentController;
 use App\Http\Controllers\SalespageController;
 use App\Http\Controllers\ShippingEstimateController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'welcome')->name('home');
+Route::get('/', [WelcomeController::class, 'index'])->name('home');
 
 Route::inertia('terms', 'legal/terms')->name('legal.terms');
 Route::inertia('privacy', 'legal/privacy')->name('legal.privacy');
