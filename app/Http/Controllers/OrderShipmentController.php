@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\OrderStatus;
 use App\Enums\ShipmentStatus;
 use App\Enums\ShippingProvider;
 use App\Exceptions\ShippingRateException;
@@ -44,9 +45,30 @@ class OrderShipmentController extends Controller
             $order->customer->notify(new ShipmentTrackingAvailable($shipment));
         }
 
+        $orderStatus = $this->orderStatusForShipmentStatus($shipment->status);
+
+        if ($orderStatus !== null) {
+            $order->update(['status' => $orderStatus]);
+        }
+
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Shipment updated.')]);
 
         return to_route('orders.show', $order);
+    }
+
+    /**
+     * The order's own status mirrors its shipment's progress once the
+     * shipment is being worked on, so the customer-facing order timeline
+     * (see OrderStatusTimeline) advances alongside it.
+     */
+    private function orderStatusForShipmentStatus(ShipmentStatus $status): ?OrderStatus
+    {
+        return match ($status) {
+            ShipmentStatus::Processing => OrderStatus::Processing,
+            ShipmentStatus::Shipped => OrderStatus::Shipped,
+            ShipmentStatus::Delivered => OrderStatus::Completed,
+            ShipmentStatus::Pending, ShipmentStatus::Failed => null,
+        };
     }
 
     /**

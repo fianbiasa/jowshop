@@ -101,6 +101,28 @@ class OrderManagementTest extends TestCase
         Notification::assertSentTo($order->customer, ShipmentTrackingAvailable::class);
     }
 
+    public function test_updating_shipment_status_advances_the_order_status(): void
+    {
+        $user = User::factory()->create();
+        $order = Order::factory()->create(['status' => OrderStatus::Paid]);
+        Shipment::factory()->for($order)->create(['status' => ShipmentStatus::Pending]);
+
+        $this->actingAs($user)->put(route('orders.shipment.update', $order), [
+            'status' => ShipmentStatus::Processing->value,
+        ]);
+        $this->assertSame(OrderStatus::Processing, $order->fresh()->status);
+
+        $this->actingAs($user)->put(route('orders.shipment.update', $order), [
+            'status' => ShipmentStatus::Shipped->value,
+        ]);
+        $this->assertSame(OrderStatus::Shipped, $order->fresh()->status);
+
+        $this->actingAs($user)->put(route('orders.shipment.update', $order), [
+            'status' => ShipmentStatus::Delivered->value,
+        ]);
+        $this->assertSame(OrderStatus::Completed, $order->fresh()->status);
+    }
+
     public function test_updating_shipment_without_changing_tracking_number_does_not_resend_notification(): void
     {
         Notification::fake();
