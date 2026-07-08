@@ -13,7 +13,13 @@ declare module '@inertiajs/core' {
             name: string;
             auth: Auth;
             sidebarOpen: boolean;
-            branding: { logoUrl: string | null; siteName: string };
+            branding: {
+                logoUrl: string | null;
+                siteName: string;
+                address: string | null;
+                email: string | null;
+                phone: string | null;
+            };
             [key: string]: unknown;
         };
     }

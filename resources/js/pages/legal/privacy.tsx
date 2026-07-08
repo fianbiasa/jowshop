@@ -1,5 +1,6 @@
-import { usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import LegalPageLayout from '@/components/legal-page-layout';
+import { contact } from '@/routes/legal';
 
 export default function Privacy() {
     const { branding } = usePage().props;
@@ -39,6 +40,27 @@ export default function Privacy() {
             <p>
                 Kami menerapkan langkah-langkah wajar untuk melindungi data
                 kamu dari akses yang tidak sah.
+            </p>
+
+            <h2>Kontak</h2>
+            <p>
+                Ada pertanyaan tentang kebijakan privasi ini? Hubungi kami di{' '}
+                <Link href={contact()} className="underline">
+                    halaman kontak
+                </Link>
+                {branding.email && (
+                    <>
+                        {' '}
+                        atau langsung ke{' '}
+                        <a
+                            href={`mailto:${branding.email}`}
+                            className="underline"
+                        >
+                            {branding.email}
+                        </a>
+                    </>
+                )}
+                .
             </p>
         </LegalPageLayout>
     );

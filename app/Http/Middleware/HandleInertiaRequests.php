@@ -45,16 +45,26 @@ class HandleInertiaRequests extends Middleware
         $requiresAuth = $request->route()
             && in_array('auth', $request->route()->gatherMiddleware(), true);
 
+        $brandingSetting = BrandingSetting::query()->first();
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
                 'user' => $requiresAuth ? $request->user() : null,
+                // Whether someone is signed in at all, safe to expose on
+                // public pages (unlike the `user` object above) since it
+                // reveals no personal data — used to swap the welcome
+                // page's "Masuk" button for a "Buka Dashboard" one.
+                'check' => $request->user() !== null,
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'branding' => [
-                'logoUrl' => BrandingSetting::query()->first()?->logoUrl(),
+                'logoUrl' => $brandingSetting?->logoUrl(),
                 'siteName' => config('app.name'),
+                'address' => $brandingSetting?->address,
+                'email' => $brandingSetting?->email ?? config('mail.from.address'),
+                'phone' => $brandingSetting?->phone,
             ],
         ];
     }

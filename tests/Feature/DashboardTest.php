@@ -31,6 +31,10 @@ class DashboardTest extends TestCase
         $this->actingAs($user);
 
         $response = $this->get(route('dashboard'));
-        $response->assertInertia(fn ($page) => $page->where('auth.user.id', $user->id));
+        $response->assertInertia(fn ($page) => $page
+            ->where('auth.user.id', $user->id)
+            ->where('auth.user.avatar', $user->avatar)
+            ->where('auth.check', true)
+        );
     }
 }

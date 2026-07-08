@@ -103,18 +103,102 @@ class BrandingSettingTest extends TestCase
     public function test_branding_shared_prop_is_available_on_admin_and_public_pages(): void
     {
         Storage::fake('public');
-        BrandingSetting::factory()->create(['logo_path' => 'branding/logo.png']);
+        BrandingSetting::factory()->create([
+            'logo_path' => 'branding/logo.png',
+            'address' => 'Jl. Contoh No. 1, Jakarta',
+            'email' => 'halo@bisnismu.com',
+            'phone' => '0812345678',
+        ]);
         $user = User::factory()->create();
 
         $adminResponse = $this->actingAs($user)->get(route('dashboard'));
         $adminResponse->assertInertia(fn ($page) => $page
             ->where('branding.logoUrl', Storage::disk('public')->url('branding/logo.png'))
             ->where('branding.siteName', config('app.name'))
+            ->where('branding.address', 'Jl. Contoh No. 1, Jakarta')
+            ->where('branding.email', 'halo@bisnismu.com')
+            ->where('branding.phone', '0812345678')
         );
 
         $publicResponse = $this->get(route('home'));
         $publicResponse->assertInertia(fn ($page) => $page
             ->where('branding.logoUrl', Storage::disk('public')->url('branding/logo.png'))
+            ->where('branding.address', 'Jl. Contoh No. 1, Jakarta')
+            ->where('branding.email', 'halo@bisnismu.com')
+            ->where('branding.phone', '0812345678')
         );
+    }
+
+    public function test_branding_email_falls_back_to_mail_from_address_when_unset(): void
+    {
+        $response = $this->get(route('home'));
+
+        $response->assertInertia(fn ($page) => $page
+            ->where('branding.email', config('mail.from.address'))
+        );
+    }
+
+    public function test_updating_contact_info_persists_address_email_and_phone(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->put(route('branding-settings.update'), [
+            'address' => 'Jl. Contoh No. 1, Jakarta',
+            'email' => 'halo@bisnismu.com',
+            'phone' => '0812345678',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+
+        $setting = BrandingSetting::query()->firstOrFail();
+        $this->assertSame('Jl. Contoh No. 1, Jakarta', $setting->address);
+        $this->assertSame('halo@bisnismu.com', $setting->email);
+        $this->assertSame('0812345678', $setting->phone);
+    }
+
+    public function test_updating_the_logo_does_not_clear_existing_contact_info(): void
+    {
+        Storage::fake('public');
+        $user = User::factory()->create();
+        BrandingSetting::factory()->create([
+            'address' => 'Jl. Contoh No. 1, Jakarta',
+            'email' => 'halo@bisnismu.com',
+            'phone' => '0812345678',
+        ]);
+
+        $this->actingAs($user)->put(route('branding-settings.update'), [
+            'logo' => UploadedFile::fake()->image('logo.png'),
+        ]);
+
+        $setting = BrandingSetting::query()->firstOrFail();
+        $this->assertSame('Jl. Contoh No. 1, Jakarta', $setting->address);
+        $this->assertSame('halo@bisnismu.com', $setting->email);
+        $this->assertSame('0812345678', $setting->phone);
+    }
+
+    public function test_updating_contact_info_does_not_clear_the_existing_logo(): void
+    {
+        Storage::fake('public');
+        $user = User::factory()->create();
+        BrandingSetting::factory()->create(['logo_path' => 'branding/logo.png']);
+
+        $this->actingAs($user)->put(route('branding-settings.update'), [
+            'email' => 'halo@bisnismu.com',
+        ]);
+
+        $setting = BrandingSetting::query()->firstOrFail();
+        $this->assertSame('branding/logo.png', $setting->logo_path);
+        $this->assertSame('halo@bisnismu.com', $setting->email);
+    }
+
+    public function test_invalid_contact_email_is_rejected(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->put(route('branding-settings.update'), [
+            'email' => 'not-an-email',
+        ]);
+
+        $response->assertSessionHasErrors('email');
     }
 }

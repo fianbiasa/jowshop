@@ -162,6 +162,9 @@ class PublicSalespageTest extends TestCase
         $response = $this->actingAs($admin)->get('/f/kopi-robusta');
 
         $response->assertOk();
-        $response->assertInertia(fn ($page) => $page->where('auth.user', null));
+        $response->assertInertia(fn ($page) => $page
+            ->where('auth.user', null)
+            ->where('auth.check', true)
+        );
     }
 }

@@ -13,7 +13,7 @@ use Inertia\Response;
 class BrandingSettingController extends Controller
 {
     /**
-     * Show the site branding (logo) settings page.
+     * Show the site branding (logo & contact info) settings page.
      */
     public function edit(): Response
     {
@@ -21,11 +21,16 @@ class BrandingSettingController extends Controller
 
         return Inertia::render('settings/branding', [
             'logoUrl' => $setting?->logoUrl(),
+            'address' => $setting?->address,
+            'email' => $setting?->email,
+            'phone' => $setting?->phone,
         ]);
     }
 
     /**
-     * Upload a new logo, or remove the existing one.
+     * Upload a new logo, remove the existing one, and/or update contact info.
+     * The logo fields and contact fields are submitted from separate forms,
+     * so each is only touched when actually present on the request.
      */
     public function update(UpdateBrandingSettingRequest $request): RedirectResponse
     {
@@ -41,9 +46,15 @@ class BrandingSettingController extends Controller
             $setting->logo_path = $request->hasFile('logo')
                 ? $request->file('logo')->store('branding', 'public')
                 : null;
-
-            $setting->save();
         }
+
+        foreach (['address', 'email', 'phone'] as $field) {
+            if ($request->has($field)) {
+                $setting->{$field} = $validated[$field];
+            }
+        }
+
+        $setting->save();
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Branding updated.')]);
 

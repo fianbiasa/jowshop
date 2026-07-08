@@ -26,7 +26,7 @@ Route::inertia('/', 'welcome')->name('home');
 
 Route::inertia('terms', 'legal/terms')->name('legal.terms');
 Route::inertia('privacy', 'legal/privacy')->name('legal.privacy');
-Route::inertia('contact', 'legal/contact', ['contactEmail' => config('mail.from.address')])->name('legal.contact');
+Route::inertia('contact', 'legal/contact')->name('legal.contact');
 
 Route::get('sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 

@@ -80,7 +80,7 @@ export default function Welcome() {
                     </div>
 
                     <nav className="flex items-center gap-3">
-                        {auth.user ? (
+                        {auth.check ? (
                             <Button asChild>
                                 <Link href={dashboard()}>Buka Dashboard</Link>
                             </Button>
@@ -103,7 +103,7 @@ export default function Welcome() {
                             dalam satu funnel yang siap pakai.
                         </p>
                         <div className="flex items-center justify-center gap-3">
-                            {auth.user ? (
+                            {auth.check ? (
                                 <Button size="lg" asChild>
                                     <Link href={dashboard()}>
                                         Buka Dashboard
@@ -147,7 +147,14 @@ export default function Welcome() {
                             </Link>
                         ))}
                     </nav>
-                    <p className="mt-4 text-center text-sm text-muted-foreground">
+                    {(branding.address || branding.email || branding.phone) && (
+                        <p className="mt-4 text-center text-sm text-muted-foreground">
+                            {[branding.address, branding.email, branding.phone]
+                                .filter(Boolean)
+                                .join(' · ')}
+                        </p>
+                    )}
+                    <p className="mt-2 text-center text-sm text-muted-foreground">
                         &copy; {new Date().getFullYear()} {branding.siteName}
                     </p>
                 </footer>

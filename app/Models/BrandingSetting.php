@@ -12,10 +12,13 @@ use Illuminate\Support\Facades\Storage;
 /**
  * @property int $id
  * @property string|null $logo_path
+ * @property string|null $address
+ * @property string|null $email
+ * @property string|null $phone
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['logo_path'])]
+#[Fillable(['logo_path', 'address', 'email', 'phone'])]
 class BrandingSetting extends Model
 {
     /** @use HasFactory<BrandingSettingFactory> */

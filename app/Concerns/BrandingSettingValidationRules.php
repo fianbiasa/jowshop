@@ -14,6 +14,9 @@ trait BrandingSettingValidationRules
         return [
             'logo' => ['nullable', 'image', 'max:2048'],
             'remove_logo' => ['boolean'],
+            'address' => ['nullable', 'string', 'max:500'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:30'],
         ];
     }
 }

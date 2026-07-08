@@ -32,7 +32,7 @@ class LegalPagesTest extends TestCase
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page
             ->component('legal/contact')
-            ->where('contactEmail', config('mail.from.address'))
+            ->where('branding.email', config('mail.from.address'))
         );
     }
 }
