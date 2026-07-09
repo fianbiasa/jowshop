@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\Order;
 use App\Models\OrderItemDelivery;
+use App\Notifications\Channels\WhatsAppChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -26,7 +27,7 @@ class DigitalDeliveryAvailable extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', WhatsAppChannel::class];
     }
 
     /**
@@ -50,5 +51,29 @@ class DigitalDeliveryAvailable extends Notification implements ShouldQueue
 
         return $mail
             ->line('Tautan unduhan berlaku selama 30 hari sejak email ini dikirim.');
+    }
+
+    /**
+     * Get the WhatsApp representation of the notification.
+     */
+    public function toWhatsApp(object $notifiable): string
+    {
+        $deliveryBlocks = $this->deliveries
+            ->map(function (OrderItemDelivery $delivery): string {
+                $block = "*{$delivery->orderItem->product->name}*\n"
+                    .route('digital-download.show', $delivery->download_token);
+
+                if ($delivery->license_key !== null) {
+                    $block .= "\nKode Lisensi: {$delivery->license_key}";
+                }
+
+                return $block;
+            })
+            ->implode("\n\n");
+
+        return "Terima kasih atas pembelianmu!\n\n"
+            ."Pesanan {$this->order->order_number} telah dibayar dan file digitalmu sudah siap diunduh.\n\n"
+            .$deliveryBlocks."\n\n"
+            .'Tautan unduhan berlaku selama 30 hari sejak pesan ini dikirim.';
     }
 }

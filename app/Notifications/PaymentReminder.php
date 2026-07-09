@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Order;
+use App\Notifications\Channels\WhatsAppChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -26,7 +27,7 @@ class PaymentReminder extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', WhatsAppChannel::class];
     }
 
     /**
@@ -42,6 +43,20 @@ class PaymentReminder extends Notification implements ShouldQueue
             ->line("Pesanan {$this->order->order_number} senilai **{$amount}** masih menunggu pembayaran.")
             ->line($this->urgencyLine())
             ->action('Selesaikan Pembayaran', $this->order->resumePaymentUrl());
+    }
+
+    /**
+     * Get the WhatsApp representation of the notification.
+     */
+    public function toWhatsApp(object $notifiable): string
+    {
+        $amount = 'Rp'.number_format((float) $this->order->total, 0, ',', '.');
+
+        return $this->greeting()."\n\n"
+            ."Pesanan {$this->order->order_number} senilai *{$amount}* masih menunggu pembayaran.\n\n"
+            .$this->urgencyLine()."\n\n"
+            ."Selesaikan pembayaran di sini:\n"
+            .$this->order->resumePaymentUrl();
     }
 
     private function subject(): string

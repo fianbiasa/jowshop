@@ -39,4 +39,14 @@ class Customer extends Model
     {
         return $this->hasMany(Order::class);
     }
+
+    /**
+     * Route WhatsApp notifications to the customer's phone number.
+     */
+    public function routeNotificationForWhatsapp(): ?string
+    {
+        $digits = preg_replace('/\D/', '', (string) $this->phone);
+
+        return $digits === '' ? null : $digits;
+    }
 }

@@ -65,6 +65,40 @@ class CheckoutFlowTest extends TestCase
         $this->assertSame(1, Order::query()->count());
     }
 
+    public function test_checkout_rejects_invalid_whatsapp_number(): void
+    {
+        $funnel = $this->publishedFunnel('digital');
+
+        foreach (['bukan-nomor', '0812', '021 555 0123'] as $invalidPhone) {
+            $response = $this->post("/f/{$funnel->slug}/checkout", [
+                ...$this->buyerPayload(),
+                'phone' => $invalidPhone,
+            ]);
+
+            $response->assertSessionHasErrors('phone');
+            $this->flushSession();
+        }
+
+        $this->assertSame(0, Order::query()->count());
+    }
+
+    public function test_checkout_accepts_common_whatsapp_number_formats(): void
+    {
+        $funnel = $this->publishedFunnel('digital');
+
+        foreach (['081234567890', '+62 812-3456-7890', '6281234567890'] as $phone) {
+            $response = $this->post("/f/{$funnel->slug}/checkout", [
+                ...$this->buyerPayload(),
+                'phone' => $phone,
+            ]);
+
+            $response->assertSessionHasNoErrors();
+            $this->flushSession();
+        }
+
+        $this->assertSame(3, Order::query()->count());
+    }
+
     public function test_physical_product_checkout_requires_address(): void
     {
         $funnel = $this->publishedFunnel('physical');

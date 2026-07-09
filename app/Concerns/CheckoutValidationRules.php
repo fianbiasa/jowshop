@@ -17,7 +17,7 @@ trait CheckoutValidationRules
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
-            'phone' => ['required', 'string', 'max:30'],
+            'phone' => ['required', 'string', 'max:30', 'regex:/^(?:\+?62|0)[\s-]?8(?:[\s-]?\d){7,12}$/'],
             'province' => [$physical ? 'required' : 'nullable', 'string', 'max:255'],
             'city' => [$physical ? 'required' : 'nullable', 'string', 'max:255'],
             'district' => [$physical ? 'required' : 'nullable', 'string', 'max:255'],

@@ -27,6 +27,11 @@ export interface MetaCapiSettingSummary {
     is_configured: true;
 }
 
+export interface WhatsAppSettingSummary {
+    is_active: boolean;
+    is_configured: true;
+}
+
 export type ShippingProvider = 'komerce' | 'rajaongkir' | 'biteship';
 
 export interface ShippingSettingSummary {

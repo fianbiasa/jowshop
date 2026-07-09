@@ -8,6 +8,7 @@ use App\Http\Controllers\Settings\PaymentSettingController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
 use App\Http\Controllers\Settings\ShippingSettingController;
+use App\Http\Controllers\Settings\WhatsAppSettingController;
 use Illuminate\Auth\Middleware\RequirePassword;
 use Illuminate\Support\Facades\Route;
 
@@ -47,6 +48,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('settings/cdn', [CdnSettingController::class, 'edit'])->name('cdn-settings.edit');
     Route::put('settings/cdn', [CdnSettingController::class, 'update'])->name('cdn-settings.update');
+
+    Route::get('settings/whatsapp', [WhatsAppSettingController::class, 'edit'])->name('whatsapp-settings.edit');
+    Route::put('settings/whatsapp', [WhatsAppSettingController::class, 'update'])->name('whatsapp-settings.update');
 });
 
 Route::get('.well-known/passkey-endpoints', function () {

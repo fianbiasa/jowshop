@@ -31,4 +31,16 @@ class StoreCheckoutRequest extends FormRequest
 
         return $this->checkoutRules($funnel);
     }
+
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'phone.regex' => 'Masukkan nomor WhatsApp yang valid, contoh: 081234567890.',
+        ];
+    }
 }

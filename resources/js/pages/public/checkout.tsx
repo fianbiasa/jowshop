@@ -162,6 +162,8 @@ export default function Checkout({
                             <Label htmlFor="phone">Nomor WhatsApp</Label>
                             <Input
                                 id="phone"
+                                type="tel"
+                                placeholder="081234567890"
                                 value={form.data.phone}
                                 onChange={(e) =>
                                     form.setData('phone', e.target.value)
@@ -169,6 +171,10 @@ export default function Checkout({
                                 required
                             />
                             <InputError message={form.errors.phone} />
+                            <p className="text-xs text-muted-foreground">
+                                Konfirmasi pesanan dan info pembayaran akan
+                                dikirim ke email dan nomor WhatsApp ini.
+                            </p>
                         </div>
                     </div>
 

@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Order;
+use App\Notifications\Channels\WhatsAppChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -21,7 +22,7 @@ class OrderConfirmed extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', WhatsAppChannel::class];
     }
 
     /**
@@ -44,6 +45,26 @@ class OrderConfirmed extends Notification implements ShouldQueue
             ->line('**Total: '.$this->formatPrice($this->order->total).'**')
             ->action('Selesaikan Pembayaran', $this->order->resumePaymentUrl())
             ->line('Pesanan akan diproses setelah pembayaran diterima.');
+    }
+
+    /**
+     * Get the WhatsApp representation of the notification.
+     */
+    public function toWhatsApp(object $notifiable): string
+    {
+        $this->order->loadMissing('items.product');
+
+        $itemLines = $this->order->items
+            ->map(fn ($item) => "{$item->quantity}x {$item->product->name} — ".$this->formatPrice($item->unit_price))
+            ->implode("\n");
+
+        return "Terima kasih atas pesananmu!\n\n"
+            ."Kami sudah menerima pesanan {$this->order->order_number}, berikut rinciannya:\n\n"
+            .$itemLines."\n"
+            .'*Total: '.$this->formatPrice($this->order->total)."*\n\n"
+            ."Selesaikan pembayaran lewat tautan berikut:\n"
+            .$this->order->resumePaymentUrl()."\n\n"
+            .'Pesanan akan diproses setelah pembayaran diterima.';
     }
 
     private function formatPrice(string $amount): string

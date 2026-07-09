@@ -13,6 +13,7 @@ import { edit as editPaymentSettings } from '@/routes/payment-settings';
 import { edit } from '@/routes/profile';
 import { edit as editSecurity } from '@/routes/security';
 import { edit as editShippingSettings } from '@/routes/shipping-settings';
+import { edit as editWhatsAppSettings } from '@/routes/whatsapp-settings';
 import type { NavItem } from '@/types';
 
 const sidebarNavItems: NavItem[] = [
@@ -54,6 +55,11 @@ const sidebarNavItems: NavItem[] = [
     {
         title: 'CDN',
         href: editCdnSettings(),
+        icon: null,
+    },
+    {
+        title: 'WhatsApp',
+        href: editWhatsAppSettings(),
         icon: null,
     },
 ];
