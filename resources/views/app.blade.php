@@ -54,5 +54,6 @@
     </head>
     <body class="font-sans antialiased">
         <x-inertia::app />
+			<script src="https://dotics.my.id/t.js" data-site="wcewxcvgbs" async></script>
     </body>
 </html>

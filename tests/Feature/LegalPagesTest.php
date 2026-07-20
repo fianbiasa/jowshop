@@ -35,4 +35,12 @@ class LegalPagesTest extends TestCase
             ->where('branding.email', config('mail.from.address'))
         );
     }
+
+    public function test_refund_policy_page_is_displayed(): void
+    {
+        $response = $this->get(route('legal.refund-policy'));
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page->component('legal/refund-policy'));
+    }
 }

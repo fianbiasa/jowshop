@@ -18,6 +18,7 @@ const customerLinks = [
 const footerLinks = [
     { label: 'Syarat & Ketentuan', href: legal.terms() },
     { label: 'Kebijakan Privasi', href: legal.privacy() },
+    { label: 'Kebijakan Refund', href: legal.refundPolicy() },
     { label: 'Kontak', href: legal.contact() },
 ];
 

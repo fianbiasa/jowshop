@@ -28,6 +28,7 @@ Route::get('/', [WelcomeController::class, 'index'])->name('home');
 Route::inertia('terms', 'legal/terms')->name('legal.terms');
 Route::inertia('privacy', 'legal/privacy')->name('legal.privacy');
 Route::inertia('contact', 'legal/contact')->name('legal.contact');
+Route::inertia('refund-policy', 'legal/refund-policy')->name('legal.refund-policy');
 
 Route::get('sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
