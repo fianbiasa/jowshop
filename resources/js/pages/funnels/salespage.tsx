@@ -409,6 +409,9 @@ export default function SalespageEditor({
         aiProviderSettings[0]?.id ? String(aiProviderSettings[0].id) : '',
     );
     const [brief, setBrief] = useState('');
+    const [landingPageType, setLandingPageType] = useState('edukasi');
+    const [sourceUrl, setSourceUrl] = useState('');
+    const [sourceDocument, setSourceDocument] = useState<File | null>(null);
 
     // Content blocks have no natural id (just {type, data}), but the list
     // below supports reordering — a plain index key would let React mix up
@@ -470,8 +473,11 @@ export default function SalespageEditor({
                 ai_provider_setting_id: aiProviderId,
                 style: form.data.style,
                 brief,
+                landing_page_type: landingPageType,
+                source_url: sourceUrl,
+                source_document: sourceDocument,
             },
-            { preserveScroll: true },
+            { preserveScroll: true, forceFormData: true },
         );
     }
 
@@ -524,6 +530,33 @@ export default function SalespageEditor({
                                     </Select>
                                 </div>
                                 <div className="grid gap-2">
+                                    <Label htmlFor="landing-page-type">
+                                        Jenis Landing Page
+                                    </Label>
+                                    <Select
+                                        value={landingPageType}
+                                        onValueChange={setLandingPageType}
+                                    >
+                                        <SelectTrigger id="landing-page-type">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="edukasi">
+                                                Edukasi — informatif, minim
+                                                tekanan jual
+                                            </SelectItem>
+                                            <SelectItem value="softsale">
+                                                Soft Sale — bangun
+                                                kepercayaan, ajakan halus
+                                            </SelectItem>
+                                            <SelectItem value="hardsale">
+                                                Hard Sale — urgency &amp; CTA
+                                                kuat
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="grid gap-2">
                                     <Label htmlFor="brief">
                                         Brief Tambahan (opsional)
                                     </Label>
@@ -535,6 +568,39 @@ export default function SalespageEditor({
                                         }
                                         placeholder="Target audiens, tone, benefit yang ingin ditonjolkan..."
                                     />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="source-url">
+                                        Ambil Materi dari URL (opsional)
+                                    </Label>
+                                    <Input
+                                        id="source-url"
+                                        type="url"
+                                        value={sourceUrl}
+                                        onChange={(e) =>
+                                            setSourceUrl(e.target.value)
+                                        }
+                                        placeholder="https://contoh.com/brosur-produk"
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="source-document">
+                                        Upload Dokumen Sumber (opsional)
+                                    </Label>
+                                    <Input
+                                        id="source-document"
+                                        type="file"
+                                        accept=".txt,.md,.pdf"
+                                        onChange={(e) =>
+                                            setSourceDocument(
+                                                e.target.files?.[0] ?? null,
+                                            )
+                                        }
+                                    />
+                                    <p className="text-xs text-muted-foreground">
+                                        Format .txt, .md, atau .pdf — mis.
+                                        brosur atau riset produk.
+                                    </p>
                                 </div>
                                 <p className="text-xs text-muted-foreground">
                                     Ini akan menimpa seluruh konten salespage

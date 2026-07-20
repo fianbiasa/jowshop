@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Enums\LandingPageType;
 use App\Enums\SalespageStyle;
 use App\Exceptions\AiGenerationException;
 use App\Models\AiGenerationLog;
@@ -23,9 +24,15 @@ class GenerateSalespageContent
      *
      * @throws AiGenerationException if the AI provider request fails or returns unparsable content.
      */
-    public function __invoke(Funnel $funnel, AiProviderSetting $setting, SalespageStyle $style, ?string $brief = null): Salespage
-    {
-        $prompt = $this->buildPrompt($funnel, $style, $brief);
+    public function __invoke(
+        Funnel $funnel,
+        AiProviderSetting $setting,
+        SalespageStyle $style,
+        ?string $brief = null,
+        ?LandingPageType $landingPageType = null,
+        ?string $sourceMaterial = null,
+    ): Salespage {
+        $prompt = $this->buildPrompt($funnel, $style, $brief, $landingPageType, $sourceMaterial);
         $rawContent = null;
 
         try {
@@ -70,8 +77,13 @@ class GenerateSalespageContent
         }
     }
 
-    private function buildPrompt(Funnel $funnel, SalespageStyle $style, ?string $brief): string
-    {
+    private function buildPrompt(
+        Funnel $funnel,
+        SalespageStyle $style,
+        ?string $brief,
+        ?LandingPageType $landingPageType,
+        ?string $sourceMaterial,
+    ): string {
         $product = $funnel->product;
 
         return implode("\n", array_filter([
@@ -80,7 +92,9 @@ class GenerateSalespageContent
             $product?->description ? "Deskripsi produk: {$product->description}" : null,
             $product ? "Harga: Rp{$product->price}" : null,
             $brief ? "Brief tambahan dari admin: {$brief}" : null,
+            $landingPageType ? $this->toneGuidanceForType($landingPageType) : null,
             $this->toneGuidanceFor($style),
+            $sourceMaterial ? "Materi sumber (dari URL/dokumen yang diunggah admin), gunakan sebagai referensi utama untuk fakta, kandungan, dan klaim produk — jangan menambahkan klaim yang tidak didukung materi ini, khususnya klaim medis/menyembuhkan penyakit:\n---\n{$sourceMaterial}\n---" : null,
             'Balas HANYA dengan JSON array (tanpa markdown code fence, tanpa teks lain) berisi blok-blok salespage.',
             'Setiap elemen array berbentuk {"type": "...", "data": {...}}.',
             'Gunakan tipe blok berikut sesuai kebutuhan: headline ({"text"}), subheadline ({"text"}), benefit_list ({"items": [string]}), testimonial ({"name","quote"}), faq ({"items": [{"question","answer"}]}), guarantee ({"text"}), cta ({"label"}), divider ({}), spacer ({"height": "sm"|"md"|"lg"}).',
@@ -100,6 +114,20 @@ class GenerateSalespageContent
             SalespageStyle::Editorial => 'Gaya tulisan: storytelling naratif yang lebih panjang, mengalir seperti artikel, cocok untuk produk edukasi/kelas.',
             SalespageStyle::Minimal => 'Gaya tulisan: singkat, padat, langsung ke inti, tanpa basa-basi berlebihan.',
             SalespageStyle::Ledger => 'Gaya tulisan: lugas dan transparan seperti nota/kwitansi, tekankan rincian harga dan bukti/jaminan, minim gimmick.',
+        };
+    }
+
+    /**
+     * The landing-page type is an independent axis from the visual style
+     * above — it drives how hard the copy sells (informative vs. urgent),
+     * separate from how the page looks.
+     */
+    private function toneGuidanceForType(LandingPageType $type): string
+    {
+        return match ($type) {
+            LandingPageType::Edukasi => 'Jenis landing page: edukasi. Fokus menjelaskan produk secara informatif dan mendidik pembaca (apa itu, cara kerja, kandungan, manfaat umum), minim tekanan untuk membeli segera, hindari urgency/scarcity artifisial.',
+            LandingPageType::Softsale => 'Jenis landing page: soft-sell. Bangun kepercayaan dan edukasi terlebih dahulu, ajakan membeli disampaikan secara halus dan natural, hindari kesan memaksa atau urgency berlebihan.',
+            LandingPageType::Hardsale => 'Jenis landing page: hard-sell. Fokus mendorong konversi secepat mungkin, tekankan urgency/scarcity, benefit yang tegas, dan CTA yang kuat di banyak bagian halaman.',
         };
     }
 

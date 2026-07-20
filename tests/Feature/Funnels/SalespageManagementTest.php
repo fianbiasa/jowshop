@@ -4,6 +4,7 @@ namespace Tests\Feature\Funnels;
 
 use App\Enums\AiProvider;
 use App\Enums\SalespageStyle;
+use App\Models\AiGenerationLog;
 use App\Models\AiProviderSetting;
 use App\Models\Funnel;
 use App\Models\Salespage;
@@ -460,5 +461,109 @@ class SalespageManagementTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors('style');
+    }
+
+    public function test_landing_page_type_is_included_in_the_ai_prompt(): void
+    {
+        Http::fake([
+            'api.openai.com/*' => Http::response([
+                'choices' => [
+                    ['message' => ['content' => json_encode([
+                        ['type' => 'headline', 'data' => ['text' => 'Kopi Terbaik di Kota']],
+                    ])]],
+                ],
+                'usage' => ['prompt_tokens' => 120, 'completion_tokens' => 40],
+            ], 200),
+        ]);
+
+        $user = User::factory()->create();
+        $funnel = Funnel::factory()->for($user, 'creator')->create();
+        $setting = AiProviderSetting::factory()->for($user, 'creator')->create();
+
+        $response = $this->actingAs($user)->post(route('funnels.salespage.generate', $funnel), [
+            'ai_provider_setting_id' => $setting->id,
+            'style' => 'bold',
+            'landing_page_type' => 'hardsale',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('ai_generation_logs', [
+            'ai_provider_setting_id' => $setting->id,
+            'status' => 'success',
+        ]);
+        $log = AiGenerationLog::query()->where('ai_provider_setting_id', $setting->id)->firstOrFail();
+        $this->assertStringContainsString('hard-sell', $log->prompt);
+    }
+
+    public function test_uploaded_source_document_text_is_extracted_and_included_in_the_prompt(): void
+    {
+        Http::fake([
+            'api.openai.com/*' => Http::response([
+                'choices' => [
+                    ['message' => ['content' => json_encode([
+                        ['type' => 'headline', 'data' => ['text' => 'Kopi Terbaik di Kota']],
+                    ])]],
+                ],
+                'usage' => ['prompt_tokens' => 120, 'completion_tokens' => 40],
+            ], 200),
+        ]);
+
+        $user = User::factory()->create();
+        $funnel = Funnel::factory()->for($user, 'creator')->create();
+        $setting = AiProviderSetting::factory()->for($user, 'creator')->create();
+        $document = UploadedFile::fake()->createWithContent('brosur.md', 'Kandungan rahasia kopi legendaris dari pegunungan Gayo.');
+
+        $response = $this->actingAs($user)->post(route('funnels.salespage.generate', $funnel), [
+            'ai_provider_setting_id' => $setting->id,
+            'style' => 'minimal',
+            'source_document' => $document,
+        ]);
+
+        $response->assertSessionHasNoErrors();
+
+        $log = AiGenerationLog::query()->where('ai_provider_setting_id', $setting->id)->firstOrFail();
+        $this->assertStringContainsString('Kandungan rahasia kopi legendaris dari pegunungan Gayo.', $log->prompt);
+    }
+
+    public function test_source_document_with_unsupported_extension_is_rejected(): void
+    {
+        $user = User::factory()->create();
+        $funnel = Funnel::factory()->for($user, 'creator')->create();
+        $setting = AiProviderSetting::factory()->for($user, 'creator')->create();
+        $document = UploadedFile::fake()->create('brosur.docx', 10);
+
+        $response = $this->actingAs($user)->post(route('funnels.salespage.generate', $funnel), [
+            'ai_provider_setting_id' => $setting->id,
+            'style' => 'minimal',
+            'source_document' => $document,
+        ]);
+
+        $response->assertSessionHasErrors('source_document');
+    }
+
+    public function test_source_url_pointing_to_a_private_address_is_rejected(): void
+    {
+        Http::fake([
+            'api.openai.com/*' => Http::response([
+                'choices' => [['message' => ['content' => json_encode([['type' => 'headline', 'data' => ['text' => 'x']]])]]],
+                'usage' => ['prompt_tokens' => 1, 'completion_tokens' => 1],
+            ], 200),
+        ]);
+
+        $user = User::factory()->create();
+        $funnel = Funnel::factory()->for($user, 'creator')->create();
+        $setting = AiProviderSetting::factory()->for($user, 'creator')->create();
+
+        $response = $this->actingAs($user)->post(route('funnels.salespage.generate', $funnel), [
+            'ai_provider_setting_id' => $setting->id,
+            'style' => 'minimal',
+            'source_url' => 'http://127.0.0.1:8080/internal',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $response->assertRedirect(route('funnels.salespage.edit', $funnel));
+        $this->assertNull(Salespage::query()->where('funnel_id', $funnel->id)->first());
+        Http::assertNotSent(fn ($request) => str_contains($request->url(), 'api.openai.com'));
     }
 }
